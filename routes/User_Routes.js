@@ -3,8 +3,14 @@ const {
     loginUser,
     currentUser,
     registerUser,
+    addCustomerAddress,
+    addCustomerCard,
 } = require("../controllers/Users_Controller");
-const { validateRegistration } = require("../services/Validation");
+const {
+    validateRegistration,
+    validateCard,
+    validateAddress,
+} = require("../services/Validation");
 const router = express.Router();
 
 router.post(
@@ -12,6 +18,14 @@ router.post(
     validateRegistration("customer"),
     registerUser
 );
+
+router.post(
+    "/customers/:userID/addresses",
+    validateAddress(),
+    addCustomerAddress
+);
+
+router.post("/customers/:userID/cards", validateCard(), addCustomerCard);
 
 router.post("/sellers/register", validateRegistration("seller"), registerUser);
 

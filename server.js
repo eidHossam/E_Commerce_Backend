@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const cors = require("cors");
 const usersRouter = require("./routes/User_Routes");
-const errorHandler = require("./middleware/Error_Handler");
+const { errorHandler } = require("./middleware/Error_Handler");
 
 const port = process.env.PORT || 5000;
 const app = express();

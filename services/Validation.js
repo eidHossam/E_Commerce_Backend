@@ -33,11 +33,33 @@ const validateRegistration = (userType) => {
                     min: process.env.PHONE_NUMBER_MIN_LENGTH,
                     max: process.env.PHONE_NUMBER_MAX_LENGTH,
                 })
-                .withMessage("Phone number must be 11 characters long")
+                .withMessage(
+                    `Phone number must be ${process.env.PHONE_NUMBER_MAX_LENGTH} characters long`
+                )
         );
     }
 
     return validationRules;
 };
 
-module.exports = { validateRegistration };
+const validateCard = () => {
+    return [
+        body("card_no")
+            .isLength({ min: 16, max: 16 })
+            .withMessage("Card number must be 16 digits long"),
+    ];
+};
+
+const validateAddress = () => {
+    return [
+        body("address")
+            .isLength({
+                min: process.env.ADDRESS_MIN_LENGTH,
+                max: process.env.ADDRESS_MAX_LENGTH,
+            })
+            .withMessage(
+                `Address must be between ${process.env.ADDRESS_MIN_LENGTH} and ${process.env.ADDRESS_MAX_LENGTH}`
+            ),
+    ];
+};
+module.exports = { validateRegistration, validateCard, validateAddress };

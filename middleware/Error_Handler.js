@@ -1,6 +1,6 @@
 const { constants } = require("../utils/Constants");
 
-const errorHandler = (err, req, res, next) => {
+exports.errorHandler = (err, req, res, next) => {
     const statuscode = res.statusCode ? res.statusCode : 500;
 
     res.status(statuscode);
@@ -13,6 +13,7 @@ const errorHandler = (err, req, res, next) => {
                 stackTrace: err.stack,
             });
             break;
+
         case constants.CONFLICT_ERROR:
             res.json({
                 title: "conflict Error",
@@ -20,6 +21,15 @@ const errorHandler = (err, req, res, next) => {
                 stackTrace: err.stack,
             });
             break;
+
+        case constants.NOT_FOUND:
+            res.json({
+                title: "Not Found",
+                message: err.message,
+                stackTrace: err.stack,
+            });
+            break;
+
         case constants.SERVER_ERROR:
             res.json({
                 title: "Server Error",
@@ -27,9 +37,8 @@ const errorHandler = (err, req, res, next) => {
                 stackTrace: err.stack,
             });
             break;
+
         default:
             break;
     }
 };
-
-module.exports = errorHandler;
