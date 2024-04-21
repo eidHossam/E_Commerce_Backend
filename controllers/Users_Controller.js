@@ -17,14 +17,22 @@ const registerUser = asyncHandler(async (req, res, next) => {
 
     //Hash the password before storing it in the database.
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await DB_registerUser(
+    const user = {
         username,
         email,
         hashedPassword,
         phoneNum,
-        res
-    );
+    };
+
+    let table;
+
+    if (req.path === "/customers/register") {
+        table = "customer";
+    } else if (req.path === "/sellers/register") {
+        table = "seller";
+    }
+
+    const result = await DB_registerUser(table, user, res);
 
     res.status(201).json({
         message: "Registration successful",
@@ -36,6 +44,14 @@ const registerUser = asyncHandler(async (req, res, next) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
+    //1 - Make the validateLogin function to validate the user input.
+
+    //2 - Check if the user's email exists in out database.
+
+    //3 - Check if the password is correct.
+
+    //4 - If the info is correct create an access token and send it the user
+
     res.status(200).json({ message: "Login user", user: req.body });
 });
 

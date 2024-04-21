@@ -1,7 +1,7 @@
 const { body } = require("express-validator");
 
-const validateRegistration = () => {
-    return [
+const validateRegistration = (userType) => {
+    const validationRules = [
         body("username")
             .trim()
             .isLength({
@@ -24,13 +24,20 @@ const validateRegistration = () => {
             })
             .withMessage("Password cannot be empty")
             .escape(),
-        body("phoneNum")
-            .isLength({
-                min: process.env.PHONE_NUMBER_MIN_LENGTH,
-                max: process.env.PHONE_NUMBER_MAX_LENGTH,
-            })
-            .withMessage("Phone number must be 11 characters long"),
     ];
+
+    if (userType === "customer") {
+        validationRules.push(
+            body("phoneNum")
+                .isLength({
+                    min: process.env.PHONE_NUMBER_MIN_LENGTH,
+                    max: process.env.PHONE_NUMBER_MAX_LENGTH,
+                })
+                .withMessage("Phone number must be 11 characters long")
+        );
+    }
+
+    return validationRules;
 };
 
 module.exports = { validateRegistration };
