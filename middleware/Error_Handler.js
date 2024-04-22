@@ -10,7 +10,6 @@ exports.errorHandler = (err, req, res, next) => {
             res.json({
                 title: "Validation Error",
                 message: err.message,
-                stackTrace: err.stack,
             });
             break;
 
@@ -18,7 +17,6 @@ exports.errorHandler = (err, req, res, next) => {
             res.json({
                 title: "conflict Error",
                 message: err.message,
-                stackTrace: err.stack,
             });
             break;
 
@@ -26,7 +24,6 @@ exports.errorHandler = (err, req, res, next) => {
             res.json({
                 title: "Not Found",
                 message: err.message,
-                stackTrace: err.stack,
             });
             break;
 
@@ -34,7 +31,6 @@ exports.errorHandler = (err, req, res, next) => {
             res.json({
                 title: "Server Error",
                 message: err.message,
-                stackTrace: err.stack,
             });
             break;
 

@@ -19,14 +19,11 @@ const registerUser = asyncHandler(async (req, res, next) => {
         return next({ message: errors.array() });
     }
 
-    const { username, email, password, phoneNum } = req.body;
+    const { userID, username, phoneNum } = req.body;
 
-    //Hash the password before storing it in the database.
-    const hashedPassword = await bcrypt.hash(password, 10);
     const user = {
+        userID,
         username,
-        email,
-        hashedPassword,
         phoneNum,
     };
 
@@ -42,8 +39,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
     res.status(201).json({
         message: "Registration successful",
         data: {
-            username: username,
-            email: email,
+            userID,
+            username,
         },
     });
 });
