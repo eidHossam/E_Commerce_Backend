@@ -54,4 +54,42 @@ const validateAddress = () => {
             ),
     ];
 };
-module.exports = { validateRegistration, validateCard, validateAddress };
+
+const validateItem = () => {
+    return [
+        body("name")
+            .isLength({
+                min: 1,
+                max: process.env.ITEM_NAME_MAX_LENGTH,
+            })
+            .withMessage(
+                `An item name must be provided and be shorter than ${process.env.ITEM_NAME_MAX_LENGTH} characters`
+            ),
+        body("description")
+            .isLength({ max: process.env.ITEM_DESCRIPTION_MAX_LENGTH })
+            .withMessage(
+                `Item description must be shorter than ${process.env.ITEM_DESCRIPTION_MAX_LENGTH} characters`
+            ),
+        body("price")
+            .isInt({ min: 1, max: Number.MAX_SAFE_INTEGER })
+            .withMessage(
+                `price must be between 1 and ${Number.MAX_SAFE_INTEGER}`
+            ),
+        body("quantity")
+            .isInt({ min: 1, max: Number.MAX_SAFE_INTEGER })
+            .withMessage(
+                `quantity must be between 1 and ${Number.MAX_SAFE_INTEGER}`
+            ),
+        body("url")
+            .isLength({ min: 1, max: process.env.ITEM_URL_MAX_LENGTH })
+            .withMessage(
+                `url must be provided and be shorter than ${process.env.ITEM_URL_MAX_LENGTH}`
+            ),
+    ];
+};
+module.exports = {
+    validateRegistration,
+    validateCard,
+    validateAddress,
+    validateItem,
+};

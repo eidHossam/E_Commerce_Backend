@@ -1,8 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
-const { DB_registerUser } = require("../services/User_Services");
-const bcrypt = require("bcrypt");
+const { DB_registerUser, DB_searchUser } = require("../services/User_Services");
 const addCustomerInfo = require("../services/Customer_Services");
+const jwt = require("jsonwebtoken");
 
 /**
  * @brief Register user
@@ -45,16 +45,71 @@ const registerUser = asyncHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * @brief Login user
+ * @route POST api/users/login
+ * @access public
+ */
 const loginUser = asyncHandler(async (req, res) => {
-    //1 - Make the validateLogin function to validate the user input.
+    const { userID } = req.body;
+
+    if (!userID) {
+        res.status(400);
+        throw new Error("User ID is required");
+    }
 
     //2 - Check if the user's email exists in out database.
+    let searchTable = "customer";
+    const custSearchResult = await DB_searchUser(searchTable, userID, res);
+    console.log(custSearchResult);
+    //check if the user is a customer.
+    if (custSearchResult[0].length !== 0) {
+        const accessToken = jwt.sign(
+            { userID: custSearchResult[0][0].User_ID },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: "100y",
+            }
+        );
+        return res.status(200).json({
+            message: "Login successful",
+            data: {
+                accessToken,
+                userType: "customer",
+                Username: custSearchResult[0][0].Username,
+                Balance: custSearchResult[0][0].Balance,
+                Phone_no: custSearchResult[0][0].Phone_no,
+            },
+        });
+    }
 
-    //3 - Check if the password is correct.
+    searchTable = "seller";
+    const sellerSearchResult = await DB_searchUser(searchTable, userID, res);
+    console.log(sellerSearchResult);
 
-    //4 - If the info is correct create an access token and send it the user
+    //check if the user is a seller.
+    if (sellerSearchResult[0].length !== 0) {
+        const accessToken = jwt.sign(
+            { userID: sellerSearchResult[0][0].User_ID },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: "24h",
+            }
+        );
+        return res.status(200).json({
+            message: "Login successful",
+            data: {
+                accessToken,
+                type: "seller",
+                Username: sellerSearchResult[0][0].Username,
+                Balance: sellerSearchResult[0][0].Balance,
+                Phone_no: sellerSearchResult[0][0].Phone_no,
+            },
+        });
+    }
 
-    res.status(200).json({ message: "Login user", user: req.body });
+    res.status(404);
+    throw new Error("User not found");
 });
 
 const currentUser = asyncHandler(async (req, res) => {
@@ -67,7 +122,7 @@ const currentUser = asyncHandler(async (req, res) => {
 /**
  * @brief Adds a new address for a given customer
  * @route POST /users/customers/:userID/addresses
- * @access public
+ * @access private
  */
 const addCustomerAddress = asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
@@ -77,7 +132,7 @@ const addCustomerAddress = asyncHandler(async (req, res, next) => {
         return next({ message: errors.array() });
     }
 
-    const userID = req.params.userID;
+    const userID = req.user;
     const insertionTable = "customer_address";
     const { address } = req.body;
 
@@ -95,7 +150,7 @@ const addCustomerAddress = asyncHandler(async (req, res, next) => {
 /**
  * @brief Adds a new card for a given customer
  * @route POST /users/customers/:userID/cards
- * @access public
+ * @access private
  */
 const addCustomerCard = asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
@@ -105,7 +160,7 @@ const addCustomerCard = asyncHandler(async (req, res, next) => {
         return next({ message: errors.array() });
     }
 
-    const userID = req.params.userID;
+    const userID = req.user;
     const insertionTable = "customer_card";
     const { card_no } = req.body;
 
