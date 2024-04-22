@@ -16,14 +16,14 @@ const DB_registerUser = async (table, user, res) => {
         // Perform the query to register a new user
 
         let query;
-        let queryParams = [user.username, user.email, user.hashedPassword];
+        let queryParams = [user.userID, user.username];
         if (table === "customer") {
             query =
-                "INSERT INTO `customer` (`Username`, `Email`, `Password`, `Phone_no`) VALUES (?, ?, ?, ?)";
+                "INSERT INTO `customer` (`User_ID`, `Username`, `Phone_no`) VALUES (?, ?, ?)";
             queryParams.push(user.phoneNum);
         } else if (table === "seller") {
             query =
-                "INSERT INTO `seller` (`Username`, `Email`, `Password`) VALUES (?, ?, ?)";
+                "INSERT INTO `seller` (`User_ID`, `Username`) VALUES (?, ?)";
         }
 
         const result = await connection.query(query, queryParams);
@@ -63,10 +63,10 @@ const DB_addCustomerInfo = async (table, userID, data, res) => {
         let query;
         if (table === "customer_address") {
             query =
-                "INSERT INTO `customer_address` (`C_Username`, `Address`) VALUES (?, ?)";
+                "INSERT INTO `customer_address` (`C_UserID`, `Address`) VALUES (?, ?)";
         } else if (table === "customer_card") {
             query =
-                "INSERT INTO `customer_card` (`C_Username`, `Card_no`) VALUES (?, ?)";
+                "INSERT INTO `customer_card` (`C_UserID`, `Card_no`) VALUES (?, ?)";
         }
 
         const result = await connection.query(query, [userID, data]);
@@ -98,7 +98,7 @@ const DB_searchUser = async (table, userID, res) => {
     try {
         connection = await pool.getConnection();
 
-        query = `SELECT * FROM ${table} WHERE Username = ?`;
+        query = `SELECT * FROM ${table} WHERE User_ID = ?`;
 
         const result = await connection.query(query, [userID]);
 

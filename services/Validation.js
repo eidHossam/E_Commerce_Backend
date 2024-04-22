@@ -10,20 +10,12 @@ const validateRegistration = (userType) => {
             })
             .withMessage("Username cannot be empty")
             .escape(),
-        body("email")
-            .isEmail()
-            .withMessage("Email must be valid")
+        body("userID")
             .isLength({
-                max: process.env.EMAIL_MAX_LENGTH,
+                min: process.env.USERID_MIN_LENGTH,
+                max: process.env.USERID_MAX_LENGTH,
             })
-            .normalizeEmail(),
-        body("password")
-            .isLength({
-                min: process.env.PASSWORD_MIN_LENGTH,
-                max: process.env.PASSWORD_MAX_LENGTH,
-            })
-            .withMessage("Password cannot be empty")
-            .escape(),
+            .withMessage("userID cannot be empty"),
     ];
 
     if (userType === "customer") {
