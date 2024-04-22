@@ -11,6 +11,7 @@ const {
     validateCard,
     validateAddress,
 } = require("../services/Validation");
+const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
 
 router.post(
@@ -20,17 +21,18 @@ router.post(
 );
 
 router.post(
-    "/customers/:userID/addresses",
+    "/customers/addresses",
+    validateToken,
     validateAddress(),
     addCustomerAddress
 );
 
-router.post("/customers/:userID/cards", validateCard(), addCustomerCard);
+router.post("/customers/cards", validateToken, validateCard(), addCustomerCard);
 
 router.post("/sellers/register", validateRegistration("seller"), registerUser);
 
 router.post("/login", loginUser);
 
-router.get("/current", currentUser);
+router.get("/current", validateToken, currentUser);
 
 module.exports = router;
