@@ -100,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
             message: "Login successful",
             data: {
                 accessToken,
-                type: "seller",
+                userType: "seller",
                 Username: sellerSearchResult[0][0].Username,
                 Balance: sellerSearchResult[0][0].Balance,
                 Phone_no: sellerSearchResult[0][0].Phone_no,
