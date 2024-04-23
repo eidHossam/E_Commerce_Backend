@@ -48,4 +48,29 @@ const DB_getCategories = async () => {
     }
 };
 
-module.exports = { DB_addItem, DB_getCategories };
+const DB_getItemByCategory = async (category) => {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+
+        query =
+            "SELECT item.*, ( SELECT GROUP_CONCAT(Category) FROM item_category \
+                WHERE item_category.C_Item_ID = item.Item_ID) AS Categories\
+                FROM item JOIN  item_category ON item.Item_ID = item_category.C_Item_ID\
+                WHERE item_category.Category = ?";
+
+        const result = await connection.query(query, [category]);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(
+            `Failed to find items in ${category} category ` + error.message
+        );
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+module.exports = { DB_addItem, DB_getCategories, DB_getItemByCategory };
