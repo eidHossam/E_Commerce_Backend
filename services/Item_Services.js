@@ -28,4 +28,24 @@ const DB_addItem = async (item, sellerID, res) => {
     }
 };
 
-module.exports = { DB_addItem };
+const DB_getCategories = async () => {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+
+        query = "SELECT DISTINCT `Category` FROM `item_category`";
+
+        const result = await connection.query(query);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(`Failed to retrieve categories ` + error.message);
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
+module.exports = { DB_addItem, DB_getCategories };
