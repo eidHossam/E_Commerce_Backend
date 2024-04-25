@@ -43,8 +43,6 @@ const DB_addItemCategories = async (itemID, categories) => {
          VALUES (?, ?)";
 
         for (let i = 0; i < categories.length; i++) {
-            categories[i] = categories[i].toLowerCase();
-
             const searchResult = await connection.query(searchQuery, [
                 categories[i],
             ]);
@@ -74,7 +72,7 @@ const DB_getCategories = async () => {
     try {
         connection = await pool.getConnection();
 
-        query = "SELECT DISTINCT `Category` FROM `item_category`";
+        query = "SELECT `Name` FROM `category`";
 
         const result = await connection.query(query);
 

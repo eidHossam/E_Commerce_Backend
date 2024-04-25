@@ -13,7 +13,8 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
     const categories = await DB_getCategories();
 
     // Use map to extract the values of the "Category" key from each object
-    const categoriesArray = categories[0].map((obj) => obj.Category);
+    console.log(categories[0]);
+    const categoriesArray = categories[0].map((obj) => obj.Name);
     res.status(200).json({
         message: "Sending all categories",
         categories: categoriesArray,
