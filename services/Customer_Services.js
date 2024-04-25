@@ -1,5 +1,5 @@
 const { findUser } = require("../utils/UserUtils");
-const { DB_searchUser, DB_addCustomerInfo } = require("./User_Services");
+const { DB_addCustomerInfo } = require("./User_Services");
 
 const addCustomerInfo = async (userID, insertionTable, data, res) => {
     try {

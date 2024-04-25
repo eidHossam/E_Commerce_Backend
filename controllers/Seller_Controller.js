@@ -1,7 +1,12 @@
 const asyncHandler = require("express-async-handler");
 const { findUser } = require("../utils/UserUtils");
-const { DB_addItem } = require("../services/Item_Services");
 const { validationResult } = require("express-validator");
+const {
+    DB_addItem,
+    DB_deleteItem,
+    DB_getSellerItems,
+} = require("../services/Seller_Services");
+const { DB_getItemByID } = require("../services/Item_Services");
 
 /**
  * @brief Adds a new item in the system.
@@ -45,4 +50,37 @@ const addItem = asyncHandler(async (req, res, next) => {
     });
 });
 
-module.exports = { addItem };
+const getSellerItems = asyncHandler(async (req, res, next) => {
+    const sellerID = req.user;
+    const sellerItems = await DB_getSellerItems(sellerID, res);
+
+    res.status(200).json({
+        message: `Getting all items for seller with id ${sellerID}`,
+        items: sellerItems[0],
+    });
+});
+
+const deleteItem = asyncHandler(async (req, res, next) => {
+    const itemID = req.params.Item_ID;
+    const sellerID = req.user;
+
+    const itemSearchResult = await DB_getItemByID(itemID, res);
+
+    if (itemSearchResult[0].length === 0) {
+        res.status(404);
+        throw new Error(`Could not find item with id ${itemID}`);
+    }
+
+    if (itemSearchResult[0][0].I_UserID !== sellerID) {
+        res.status(401);
+        throw new Error(`unathorized access to item with id ${itemID}`);
+    }
+
+    await DB_deleteItem(itemID, res);
+
+    res.status(200).json({
+        message: `Item with id ${itemID} was deleted successfully`,
+    });
+});
+
+module.exports = { addItem, deleteItem, getSellerItems };
