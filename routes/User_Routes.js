@@ -33,6 +33,6 @@ router.post("/sellers/register", validateRegistration("seller"), registerUser);
 
 router.post("/login", loginUser);
 
-router.get("/current", validateToken, currentUser);
+router.get("/current/:userType", validateToken, currentUser);
 
 module.exports = router;

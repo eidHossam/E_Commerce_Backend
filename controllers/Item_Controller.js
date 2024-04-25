@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {
     DB_getCategories,
     DB_getItemByCategory,
+    DB_getItemByName,
 } = require("../services/Item_Services");
 
 /**
@@ -13,10 +14,9 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
     const categories = await DB_getCategories();
 
     // Use map to extract the values of the "Category" key from each object
-    const categoriesArray = categories[0].map((obj) => obj.Category);
     res.status(200).json({
         message: "Sending all categories",
-        categories: categoriesArray,
+        categories: categories[0],
     });
 });
 
@@ -27,11 +27,27 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
  */
 const getItemsByCategory = asyncHandler(async (req, res, next) => {
     const category = req.params.category;
-    const items = await DB_getItemByCategory(category);
+    const items = await DB_getItemByCategory(category, res);
 
     res.status(200).json({
         message: `Getting all items by category ${category}`,
         items: items[0],
     });
 });
-module.exports = { getAllCategories, getItemsByCategory };
+
+const getItemsByName = asyncHandler(async (req, res, next) => {
+    const itemName = req.params.itemName;
+
+    if (!itemName) {
+        res.status(404);
+        throw new Error("Item name must be provided");
+    }
+
+    const items = await DB_getItemByName(itemName, res);
+
+    res.status(200).json({
+        message: `Getting all items by name: ${itemName}`,
+        items: items[0],
+    });
+});
+module.exports = { getAllCategories, getItemsByCategory, getItemsByName };

@@ -1,6 +1,15 @@
+const pool = require("../config/DB_Connection");
 const { findUser } = require("../utils/UserUtils");
-const { DB_searchUser, DB_addCustomerInfo } = require("./User_Services");
 
+/**
+ * @breif Adds the customer additional information
+ *
+ * @param {*} userID : ID of the user
+ * @param {*} insertionTable : The table to insert the customer in.
+ * @param {*} data : dataof th user to be inserted
+ * @param {*} res : Response object.
+ * @returns : the result of the insertion process
+ */
 const addCustomerInfo = async (userID, insertionTable, data, res) => {
     try {
         const searchTable = "customer";
@@ -19,4 +28,110 @@ const addCustomerInfo = async (userID, insertionTable, data, res) => {
     }
 };
 
-module.exports = addCustomerInfo;
+/**
+ * @brief Function to add additional user information.
+ *
+ * @param {*} table : Table to add user information in.
+ * @param {*} userID: User ID to add user information for.
+ * @param {*} data  : Data to be added.
+ * @param {*} res   : the API response object to be able to change the status in case of failure.
+ * @returns         : the query result object in case of success.
+ */
+const DB_addCustomerInfo = async (table, userID, data, res) => {
+    let connection;
+    try {
+        // Get a connection from the pool
+        connection = await pool.getConnection();
+
+        // Perform the query to add a new customer address.
+
+        let query;
+        if (table === "customer_address") {
+            query =
+                "INSERT INTO `customer_address` (`C_UserID`, `Address`) VALUES (?, ?)";
+        } else if (table === "customer_card") {
+            query =
+                "INSERT INTO `customer_card` (`C_UserID`, `Card_no`) VALUES (?, ?)";
+        }
+
+        const result = await connection.query(query, [userID, data]);
+
+        // const warn = await connection.query("SHOW WARNINGS");
+        // console.log(warn);
+
+        return result;
+    } catch (error) {
+        res.status(409);
+        throw new Error(`Failed to add ${table} in SQL: ` + error.message);
+    } finally {
+        // Make sure to release the connection back to the pool
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
+/**
+ * @breif : Retreive all the address associated with a given customer
+ *
+ * @param {*} userID : ID of the customer to search for
+ * @param {*} res : response object
+ * @returns : Array of addresses.
+ */
+const DB_getCustomerAddress = async (userID, res) => {
+    let connection;
+    try {
+        // Get a connection from the pool
+        connection = await pool.getConnection();
+
+        const query =
+            "SELECT `Address` FROM `customer_address` WHERE `C_UserID` = ?";
+
+        const result = await connection.query(query, [userID]);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(`Failed to get ${userID} addresses: ` + error.message);
+    } finally {
+        // Make sure to release the connection back to the pool
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
+/**
+ * @breif : Retreive all the cards associated with a given customer
+ *
+ * @param {*} userID : ID of the customer to search for
+ * @param {*} res : response object
+ * @returns : Array of cards.
+ */
+const DB_getCustomerCard = async (userID, res) => {
+    let connection;
+    try {
+        // Get a connection from the pool
+        connection = await pool.getConnection();
+
+        const query =
+            "SELECT `Card_no` FROM `customer_card` WHERE `C_UserID` = ?";
+
+        const result = await connection.query(query, [userID]);
+
+        // const warn = await connection.query("SHOW WARNINGS");
+        // console.log(warn);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(`Failed to get ${userID} cards: ` + error.message);
+    } finally {
+        // Make sure to release the connection back to the pool
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
+module.exports = { addCustomerInfo, DB_getCustomerAddress, DB_getCustomerCard };

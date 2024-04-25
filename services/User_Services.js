@@ -44,49 +44,6 @@ const DB_registerUser = async (table, user, res) => {
 };
 
 /**
- * @brief Function to add additional user information.
- *
- * @param {*} table : Table to add user information in.
- * @param {*} userID: User ID to add user information for.
- * @param {*} data  : Data to be added.
- * @param {*} res   : the API response object to be able to change the status in case of failure.
- * @returns         : the query result object in case of success.
- */
-const DB_addCustomerInfo = async (table, userID, data, res) => {
-    let connection;
-    try {
-        // Get a connection from the pool
-        connection = await pool.getConnection();
-
-        // Perform the query to add a new customer address.
-
-        let query;
-        if (table === "customer_address") {
-            query =
-                "INSERT INTO `customer_address` (`C_UserID`, `Address`) VALUES (?, ?)";
-        } else if (table === "customer_card") {
-            query =
-                "INSERT INTO `customer_card` (`C_UserID`, `Card_no`) VALUES (?, ?)";
-        }
-
-        const result = await connection.query(query, [userID, data]);
-
-        // const warn = await connection.query("SHOW WARNINGS");
-        // console.log(warn);
-
-        return result;
-    } catch (error) {
-        res.status(409);
-        throw new Error(`Failed to add ${table} in SQL: ` + error.message);
-    } finally {
-        // Make sure to release the connection back to the pool
-        if (connection) {
-            connection.release();
-        }
-    }
-};
-
-/**
  * @brief Function to search if a user exits in the specified table.
  * @param {*} table : The table to search for users in.
  * @param {*} userID: ID of the user to search for.
@@ -112,4 +69,4 @@ const DB_searchUser = async (table, userID, res) => {
         }
     }
 };
-module.exports = { DB_registerUser, DB_addCustomerInfo, DB_searchUser };
+module.exports = { DB_registerUser, DB_searchUser };
