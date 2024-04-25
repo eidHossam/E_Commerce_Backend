@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {
     DB_getCategories,
     DB_getItemByCategory,
+    DB_getItemByName,
 } = require("../services/Item_Services");
 
 /**
@@ -41,5 +42,12 @@ const getItemsByName = asyncHandler(async (req, res, next) => {
         res.status(404);
         throw new Error("Item name must be provided");
     }
+
+    const items = await DB_getItemByName(itemName, res);
+
+    res.status(200).json({
+        message: `Getting all items by name: ${itemName}`,
+        items: items[0],
+    });
 });
 module.exports = { getAllCategories, getItemsByCategory, getItemsByName };

@@ -119,8 +119,34 @@ const DB_getItemByName = async (itemName, res) => {
     let connection;
     try {
         connection = await pool.getConnection();
+        const itemNamePattern = `%${itemName}%`;
+
+        const query =
+            "SELECT item.*,\
+            (SELECT GROUP_CONCAT(category.Name) FROM item_category INNER JOIN category \
+            ON item_category.Category_ID = category.Category_ID WHERE item_category.Item_ID = item.Item_ID)AS categories\
+            FROM item JOIN item_category ON item_category.Item_ID = item.Item_ID \
+            JOIN category ON category.Category_ID = item_category.Category_ID \
+            WHERE item.Name LIKE ?\
+            GROUP BY item.Item_ID";
+
+        const result = await connection.query(query, [itemNamePattern]);
+
+        return result;
     } catch (error) {
+        res.status(500);
+        throw new Error(
+            `Failed to find items with name: ${itemName} ` + error.message
+        );
     } finally {
+        if (connection) {
+            connection.release();
+        }
     }
 };
-module.exports = { DB_addItem, DB_getCategories, DB_getItemByCategory };
+module.exports = {
+    DB_addItem,
+    DB_getCategories,
+    DB_getItemByCategory,
+    DB_getItemByName,
+};
