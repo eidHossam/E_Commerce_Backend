@@ -92,11 +92,13 @@ const DB_getItemByCategory = async (category, res) => {
     try {
         connection = await pool.getConnection();
 
-        query =
-            "SELECT item.*, ( SELECT GROUP_CONCAT(Category) FROM item_category \
-                WHERE item_category.C_Item_ID = item.Item_ID) AS Categories\
-                FROM item JOIN  item_category ON item.Item_ID = item_category.C_Item_ID\
-                WHERE item_category.Category = ?";
+        const query =
+            "SELECT item.*,\
+            (SELECT GROUP_CONCAT(category.Name) FROM item_category INNER JOIN category ON \
+            item_category.Category_ID = category.Category_ID WHERE item_category.Item_ID = item.Item_ID) \
+            AS categories FROM item JOIN item_category ON item_category.Item_ID = item.Item_ID \
+            JOIN category ON category.Category_ID = item_category.Category_ID \
+            WHERE category.Name = ?";
 
         const result = await connection.query(query, [category]);
 
