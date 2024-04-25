@@ -50,6 +50,11 @@ const addItem = asyncHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * @brief Retrieves all the items associated with the given seller
+ * @route GET /sellers/item
+ * @access private
+ */
 const getSellerItems = asyncHandler(async (req, res, next) => {
     const sellerID = req.user;
     const sellerItems = await DB_getSellerItems(sellerID, res);
@@ -60,6 +65,11 @@ const getSellerItems = asyncHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * @brief Deletes an items posted by the seller
+ * @route DELETE /sellers/item/:Item_ID
+ * @access private
+ */
 const deleteItem = asyncHandler(async (req, res, next) => {
     const itemID = req.params.Item_ID;
     const sellerID = req.user;

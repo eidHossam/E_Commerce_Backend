@@ -1,8 +1,13 @@
 const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 const { DB_registerUser, DB_searchUser } = require("../services/User_Services");
-const addCustomerInfo = require("../services/Customer_Services");
+const {
+    addCustomerInfo,
+    DB_getCustomerAddress,
+    DB_getCustomerCard,
+} = require("../services/Customer_Services");
 const jwt = require("jsonwebtoken");
+const { findUser } = require("../utils/UserUtils");
 
 /**
  * @brief Register user
@@ -111,16 +116,38 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error("User not found");
 });
 
+/**
+ * @brief Returns the current user information
+ * @route GET users/current/:userType
+ * @access private
+ */
 const currentUser = asyncHandler(async (req, res) => {
+    const userType = req.params.userType;
+    const userID = req.user;
+    const user = await findUser(userType, userID, res);
+
+    if (userType === "customer") {
+        const address = await DB_getCustomerAddress(userID, res);
+        const addresses = address[0].map((obj) => {
+            return obj.Address;
+        });
+        user[0].addresses = addresses;
+
+        const card = await DB_getCustomerCard(userID, res);
+        const cards = card[0].map((obj) => {
+            return obj.Card_no;
+        });
+        user[0].cards = cards;
+    }
     res.status(200).json({
         message: "Sending current user info",
-        user: req.body,
+        user: user[0],
     });
 });
 
 /**
  * @brief Adds a new address for a given customer
- * @route POST /users/customers/:userID/addresses
+ * @route POST /users/customers/addresses
  * @access private
  */
 const addCustomerAddress = asyncHandler(async (req, res, next) => {
