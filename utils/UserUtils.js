@@ -8,6 +8,8 @@ const findUser = async (searchTable, userID, res) => {
             res.status(404);
             throw new Error("User not found");
         }
+
+        return searchResult[0];
     } catch (error) {
         throw new Error(error);
     }

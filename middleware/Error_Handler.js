@@ -13,6 +13,13 @@ exports.errorHandler = (err, req, res, next) => {
             });
             break;
 
+        case constants.UNAUTHORIZED:
+            res.json({
+                title: "Unauthorized Access",
+                message: err.message,
+            });
+            break;
+
         case constants.CONFLICT_ERROR:
             res.json({
                 title: "conflict Error",

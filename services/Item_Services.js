@@ -6,7 +6,8 @@ const DB_addItem = async (item, sellerID, res) => {
         connection = await pool.getConnection();
 
         query =
-            "INSERT INTO `item` (`Name`, `Description`, `Price`, `Quantity`, `URL`, `I_UserID`) VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO `item` (`Name`, `Description`, `Price`, `Quantity`, `URL`, `I_UserID`)\
+             VALUES (?, ?, ?, ?, ?, ?)";
 
         const result = await connection.query(query, [
             item.name,
@@ -17,10 +18,50 @@ const DB_addItem = async (item, sellerID, res) => {
             sellerID,
         ]);
 
+        const itemID = result[0].insertId;
+
+        await DB_addItemCategories(itemID, item.categories);
+
         return result;
     } catch (error) {
         res.status(409);
         throw new Error(`Failed to insert ${item.name} ` + error.message);
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
+const DB_addItemCategories = async (itemID, categories) => {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        const searchQuery = "SELECT * FROM `category` WHERE `Name` = ?";
+        const insertQuery =
+            "INSERT INTO `item_category` (`Item_ID`, `Category_ID`)\
+         VALUES (?, ?)";
+
+        for (let i = 0; i < categories.length; i++) {
+            categories[i] = categories[i].toLowerCase();
+
+            const searchResult = await connection.query(searchQuery, [
+                categories[i],
+            ]);
+
+            if (searchResult[0].length === 0) {
+                const deleteQuery = "DELETE FROM `item` WHERE `Item_ID` = ?";
+                await connection.query(deleteQuery, [itemID]);
+                throw new Error(`${categories[i]} isn't a valid category`);
+            }
+
+            await connection.query(insertQuery, [
+                itemID,
+                searchResult[0][0].Category_ID,
+            ]);
+        }
+    } catch (error) {
+        throw new Error(error);
     } finally {
         if (connection) {
             connection.release();
@@ -48,7 +89,7 @@ const DB_getCategories = async () => {
     }
 };
 
-const DB_getItemByCategory = async (category) => {
+const DB_getItemByCategory = async (category, res) => {
     let connection;
     try {
         connection = await pool.getConnection();
@@ -71,6 +112,15 @@ const DB_getItemByCategory = async (category) => {
         if (connection) {
             connection.release();
         }
+    }
+};
+
+const DB_getItemByName = async (itemName, res) => {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+    } catch (error) {
+    } finally {
     }
 };
 module.exports = { DB_addItem, DB_getCategories, DB_getItemByCategory };

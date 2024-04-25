@@ -18,7 +18,7 @@ const addItem = asyncHandler(async (req, res, next) => {
     }
 
     const sellerID = req.user;
-    const { name, description, price, quantity, url } = req.body;
+    const { name, description, price, quantity, url, categories } = req.body;
 
     //Check if there is a seller with the specified ID
     const searchTable = "seller";
@@ -30,6 +30,7 @@ const addItem = asyncHandler(async (req, res, next) => {
         price,
         quantity,
         url,
+        categories,
     };
     const result = await DB_addItem(item, sellerID, res);
 

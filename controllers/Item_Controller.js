@@ -27,11 +27,20 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
  */
 const getItemsByCategory = asyncHandler(async (req, res, next) => {
     const category = req.params.category;
-    const items = await DB_getItemByCategory(category);
+    const items = await DB_getItemByCategory(category, res);
 
     res.status(200).json({
         message: `Getting all items by category ${category}`,
         items: items[0],
     });
 });
-module.exports = { getAllCategories, getItemsByCategory };
+
+const getItemsByName = asyncHandler(async (req, res, next) => {
+    const itemName = req.params.itemName;
+
+    if (!itemName) {
+        res.status(404);
+        throw new Error("Item name must be provided");
+    }
+});
+module.exports = { getAllCategories, getItemsByCategory, getItemsByName };

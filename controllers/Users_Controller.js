@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const result = await DB_registerUser(table, user, res);
 
     res.status(201).json({
-        message: "Registration successful",
+        message: `${table} registration successful`,
         data: {
             userID,
             username,
@@ -61,7 +61,7 @@ const loginUser = asyncHandler(async (req, res) => {
     //2 - Check if the user's email exists in out database.
     let searchTable = "customer";
     const custSearchResult = await DB_searchUser(searchTable, userID, res);
-    console.log(custSearchResult);
+
     //check if the user is a customer.
     if (custSearchResult[0].length !== 0) {
         const accessToken = jwt.sign(
@@ -85,7 +85,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
     searchTable = "seller";
     const sellerSearchResult = await DB_searchUser(searchTable, userID, res);
-    console.log(sellerSearchResult);
 
     //check if the user is a seller.
     if (sellerSearchResult[0].length !== 0) {
@@ -93,7 +92,7 @@ const loginUser = asyncHandler(async (req, res) => {
             { userID: sellerSearchResult[0][0].User_ID },
             process.env.ACCESS_TOKEN_SECRET,
             {
-                expiresIn: "24h",
+                expiresIn: "100y",
             }
         );
         return res.status(200).json({
