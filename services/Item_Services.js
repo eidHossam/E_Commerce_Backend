@@ -72,7 +72,7 @@ const DB_getCategories = async () => {
     try {
         connection = await pool.getConnection();
 
-        query = "SELECT `Name` FROM `category`";
+        query = "SELECT `Name`, `URL` FROM `category`";
 
         const result = await connection.query(query);
 
