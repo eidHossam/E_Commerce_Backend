@@ -8,13 +8,8 @@ const pool = require("../config/DB_Connection");
  * @returns         : the query result object in case of success.
  */
 const DB_registerUser = async (table, user, res) => {
-    let connection;
     try {
-        // Get a connection from the pool
-        connection = await pool.getConnection();
-
         // Perform the query to register a new user
-
         let query;
         let queryParams = [user.userID, user.username];
         if (table === "customer") {
@@ -26,47 +21,32 @@ const DB_registerUser = async (table, user, res) => {
                 "INSERT INTO `seller` (`User_ID`, `Username`) VALUES (?, ?)";
         }
 
-        const result = await connection.query(query, queryParams);
-
-        // const warn = await connection.query("SHOW WARNINGS");
-        // console.log(warn);
+        const result = await pool.query(query, queryParams);
 
         return result;
     } catch (error) {
         res.status(409);
         throw new Error(`Failed to create ${table} in SQL: ` + error.message);
-    } finally {
-        // Make sure to release the connection back to the pool
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
 /**
  * @brief Function to search if a user exits in the specified table.
- * @param {*} table : The table to search for users in.
- * @param {*} userID: ID of the user to search for.
- * @param {*} res   : the API response object to be able to change the status in case of failure.
- * @returns         : the query result object in case of success.
+ * @param {*} table     : The table to search for users in.
+ * @param {*} userID    : ID of the user to search for.
+ * @param {*} res       : the API response object to be able to change the status in case of failure.
+ * @returns             : the query result object in case of success.
  */
 const DB_searchUser = async (table, userID, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query = `SELECT * FROM ${table} WHERE User_ID = ?`;
 
-        const result = await connection.query(query, [userID]);
+        const result = await pool.query(query, [userID]);
 
         return result;
     } catch (error) {
         res.status(404);
         throw new Error(`Failed to find ${table}` + error.message);
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 module.exports = { DB_registerUser, DB_searchUser };

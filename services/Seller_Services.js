@@ -1,15 +1,20 @@
 const pool = require("../config/DB_Connection");
 
+/**
+ * @brief Adds a new item to the database
+ *
+ * @param {*} item      : The information of the item to be added.
+ * @param {*} sellerID  : ID of the seller adding the item to the database.
+ * @param {*} res       : Response object.
+ * @returns             : Query result
+ */
 const DB_addItem = async (item, sellerID, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query =
             "INSERT INTO `item` (`Name`, `Description`, `Price`, `Quantity`, `URL`, `I_UserID`)\
              VALUES (?, ?, ?, ?, ?, ?)";
 
-        const result = await connection.query(query, [
+        const result = await pool.query(query, [
             item.name,
             item.description,
             item.price,
@@ -26,13 +31,15 @@ const DB_addItem = async (item, sellerID, res) => {
     } catch (error) {
         res.status(409);
         throw new Error(`Failed to insert ${item.name} ` + error.message);
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
+/**
+ * @brief Adds a specific item categories .
+ *
+ * @param {*} itemID     : ID of the item to add categories for.
+ * @param {*} categories : Array of categories to be added.
+ */
 const DB_addItemCategories = async (itemID, categories) => {
     let connection;
     try {
@@ -67,14 +74,18 @@ const DB_addItemCategories = async (itemID, categories) => {
     }
 };
 
+/**
+ * @brief Delete a specific item from the database.
+ *
+ * @param {*} itemID : ID of the item to be deleted.
+ * @param {*} res    : Response object.
+ * @returns          : Query result.
+ */
 const DB_deleteItem = async (itemID, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query = "DELETE FROM item WHERE Item_ID = ?";
 
-        const result = await connection.query(query, [itemID]);
+        const result = await pool.query(query, [itemID]);
 
         return result;
     } catch (error) {
@@ -82,18 +93,18 @@ const DB_deleteItem = async (itemID, res) => {
         throw new Error(
             `Failed to delete item with ID: ${itemID}` + error.message
         );
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
+/**
+ * @brief Retrieves all the items posted by this seller.
+ *
+ * @param {*} sellerID  : The ID of the seller to retrieve the items for.
+ * @param {*} res       : Response object.
+ * @returns             : Query result.
+ */
 const DB_getSellerItems = async (sellerID, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query =
             "SELECT item.*,\
         (SELECT GROUP_CONCAT(category.Name) FROM item_category INNER JOIN category ON \
@@ -102,7 +113,7 @@ const DB_getSellerItems = async (sellerID, res) => {
         JOIN category ON category.Category_ID = item_category.Category_ID \
         WHERE item.I_UserID = ? GROUP BY item.Item_ID";
 
-        const result = await connection.query(query, [sellerID]);
+        const result = await pool.query(query, [sellerID]);
 
         return result;
     } catch (error) {
@@ -111,10 +122,6 @@ const DB_getSellerItems = async (sellerID, res) => {
             `Failed to find items for seller with ID: ${sellerID}` +
                 error.message
         );
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
