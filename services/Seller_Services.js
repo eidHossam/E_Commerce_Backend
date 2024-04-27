@@ -15,17 +15,17 @@ const DB_addItem = async (item, sellerID, res) => {
              VALUES (?, ?, ?, ?, ?, ?)";
 
         const result = await pool.query(query, [
-            item.name,
-            item.description,
-            item.price,
-            item.quantity,
-            item.url,
+            item.Name,
+            item.Description,
+            item.Price,
+            item.Quantity,
+            item.URL,
             sellerID,
         ]);
 
         const itemID = result[0].insertId;
 
-        await DB_addItemCategories(itemID, item.categories);
+        await DB_addItemCategories(itemID, item.categories, res);
 
         return result;
     } catch (error) {
@@ -40,7 +40,7 @@ const DB_addItem = async (item, sellerID, res) => {
  * @param {*} itemID     : ID of the item to add categories for.
  * @param {*} categories : Array of categories to be added.
  */
-const DB_addItemCategories = async (itemID, categories) => {
+const DB_addItemCategories = async (itemID, categories, res) => {
     let connection;
     try {
         connection = await pool.getConnection();
@@ -66,11 +66,27 @@ const DB_addItemCategories = async (itemID, categories) => {
             ]);
         }
     } catch (error) {
+        res.status(500);
         throw new Error(error);
     } finally {
         if (connection) {
             connection.release();
         }
+    }
+};
+
+const DB_deleteItemCategories = async (itemID, res) => {
+    try {
+        const query = "DELETE FROM item_category WHERE Item_ID = ?";
+
+        const result = await pool.query(query, [itemID]);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(
+            `Failed to delete item : ${itemID} categories ${error.message}`
+        );
     }
 };
 
@@ -91,7 +107,7 @@ const DB_deleteItem = async (itemID, res) => {
     } catch (error) {
         res.status(500);
         throw new Error(
-            `Failed to delete item with ID: ${itemID}` + error.message
+            `Failed to delete item with ID: ${itemID} ` + error.message
         );
     }
 };
@@ -119,10 +135,34 @@ const DB_getSellerItems = async (sellerID, res) => {
     } catch (error) {
         res.status(500);
         throw new Error(
-            `Failed to find items for seller with ID: ${sellerID}` +
+            `Failed to find items for seller with ID: ${sellerID} ` +
                 error.message
         );
     }
 };
 
-module.exports = { DB_addItem, DB_deleteItem, DB_getSellerItems };
+const DB_updateItem = async (itemID, updateQuery, values, res) => {
+    try {
+        const query = `UPDATE item SET ${updateQuery} WHERE \`Item_ID\` = ?`;
+
+        values.push(parseInt(itemID));
+
+        const result = await pool.query(query, values);
+
+        return result;
+    } catch (error) {
+        res.status(500);
+        throw new Error(
+            `Failed to update item with ID: ${itemID} ` + error.message
+        );
+    }
+};
+
+module.exports = {
+    DB_addItem,
+    DB_addItemCategories,
+    DB_deleteItem,
+    DB_getSellerItems,
+    DB_updateItem,
+    DB_deleteItemCategories,
+};
