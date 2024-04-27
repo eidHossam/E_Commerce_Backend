@@ -1,30 +1,20 @@
 const pool = require("../config/DB_Connection");
 
 const DB_getCategories = async () => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query = "SELECT `Name`, `URL` FROM `category`";
 
-        const result = await connection.query(query);
+        const result = await pool.query(query);
 
         return result;
     } catch (error) {
         res.status(500);
         throw new Error(`Failed to retrieve categories ` + error.message);
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
 const DB_getItemByCategory = async (category, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         const query =
             "SELECT item.*,\
             (SELECT GROUP_CONCAT(category.Name) FROM item_category INNER JOIN category ON \
@@ -33,7 +23,7 @@ const DB_getItemByCategory = async (category, res) => {
             JOIN category ON category.Category_ID = item_category.Category_ID \
             WHERE category.Name = ?";
 
-        const result = await connection.query(query, [category]);
+        const result = await pool.query(query, [category]);
 
         return result;
     } catch (error) {
@@ -41,17 +31,11 @@ const DB_getItemByCategory = async (category, res) => {
         throw new Error(
             `Failed to find items in ${category} category ` + error.message
         );
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
 const DB_getItemByName = async (itemName, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
         const itemNamePattern = `%${itemName}%`;
 
         const query =
@@ -63,7 +47,7 @@ const DB_getItemByName = async (itemName, res) => {
             WHERE item.Name LIKE ?\
             GROUP BY item.Item_ID";
 
-        const result = await connection.query(query, [itemNamePattern]);
+        const result = await pool.query(query, [itemNamePattern]);
 
         return result;
     } catch (error) {
@@ -71,21 +55,14 @@ const DB_getItemByName = async (itemName, res) => {
         throw new Error(
             `Failed to find items with name: ${itemName} ` + error.message
         );
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 
 const DB_getItemByID = async (itemID, res) => {
-    let connection;
     try {
-        connection = await pool.getConnection();
-
         query = "SELECT * FROM item WHERE Item_ID = ?";
 
-        const result = await connection.query(query, [itemID]);
+        const result = await pool.query(query, [itemID]);
 
         return result;
     } catch (error) {
@@ -93,10 +70,6 @@ const DB_getItemByID = async (itemID, res) => {
         throw new Error(
             `Failed to find item with ID: ${itemID}` + error.message
         );
-    } finally {
-        if (connection) {
-            connection.release();
-        }
     }
 };
 

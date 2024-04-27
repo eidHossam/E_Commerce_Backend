@@ -5,8 +5,11 @@ const {
     DB_addItem,
     DB_deleteItem,
     DB_getSellerItems,
+    DB_updateItem,
+    DB_deleteItemCategories,
+    DB_addItemCategories,
 } = require("../services/Seller_Services");
-const { DB_getItemByID } = require("../services/Item_Services");
+const checkSellerOwnership = require("../utils/SellerUtils");
 
 /**
  * @brief Adds a new item in the system.
@@ -23,29 +26,21 @@ const addItem = asyncHandler(async (req, res, next) => {
     }
 
     const sellerID = req.user;
-    const { name, description, price, quantity, url, categories } = req.body;
+    const item = req.body;
 
     //Check if there is a seller with the specified ID
     const searchTable = "seller";
     await findUser(searchTable, sellerID, res);
 
-    const item = {
-        name,
-        description,
-        price,
-        quantity,
-        url,
-        categories,
-    };
     const result = await DB_addItem(item, sellerID, res);
 
     const itemID = result[0].insertId;
     res.status(201).json({
-        message: `Item ${name} created successfully`,
+        message: `Item ${item.Name} created successfully`,
         data: {
             itemID,
             sellerID,
-            name,
+            Name: item.Name,
         },
     });
 });
@@ -73,18 +68,7 @@ const getSellerItems = asyncHandler(async (req, res, next) => {
 const deleteItem = asyncHandler(async (req, res, next) => {
     const itemID = req.params.Item_ID;
     const sellerID = req.user;
-
-    const itemSearchResult = await DB_getItemByID(itemID, res);
-
-    if (itemSearchResult[0].length === 0) {
-        res.status(404);
-        throw new Error(`Could not find item with id ${itemID}`);
-    }
-
-    if (itemSearchResult[0][0].I_UserID !== sellerID) {
-        res.status(401);
-        throw new Error(`unathorized access to item with id ${itemID}`);
-    }
+    await checkSellerOwnership(itemID, sellerID, res);
 
     await DB_deleteItem(itemID, res);
 
@@ -93,4 +77,58 @@ const deleteItem = asyncHandler(async (req, res, next) => {
     });
 });
 
-module.exports = { addItem, deleteItem, getSellerItems };
+/**
+ * @brief Updates an items posted by the seller
+ *
+ * @route PUT /sellers/item/:Item_ID
+ * @access private
+ */
+const updateItem = asyncHandler(async (req, res, next) => {
+    const itemID = req.params.Item_ID;
+    const sellerID = req.user;
+
+    //Check that the data we got is in the right format.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400);
+        return next({ message: errors.array() });
+    }
+
+    //Check that the seller owns the item he wishes to update.
+    await checkSellerOwnership(itemID, sellerID, res);
+
+    if (req.body.hasOwnProperty("categories")) {
+        const categories = req.body.categories;
+
+        await DB_deleteItemCategories(itemID, res);
+
+        await DB_addItemCategories(itemID, categories, res);
+
+        delete req.body.categories;
+    }
+
+    const updateAttributes = Object.keys(req.body);
+    let updateQuery = "";
+    let updateValues = [];
+
+    for (let i = 0; i < updateAttributes.length; i++) {
+        updateQuery += `${updateAttributes[i]} = ?`;
+
+        updateValues.push(req.body[updateAttributes[i]]);
+
+        if (i < updateAttributes.length - 1) {
+            updateQuery += ",";
+        }
+    }
+
+    if (updateAttributes.length > 0) {
+        //Update the item essential information.
+        await DB_updateItem(itemID, updateQuery, updateValues, res);
+    }
+
+    res.status(200).json({
+        message: `Updated item with ID:${itemID}`,
+    });
+});
+
+module.exports = { addItem, deleteItem, getSellerItems, updateItem };

@@ -55,38 +55,61 @@ const validateAddress = () => {
     ];
 };
 
-const validateItem = () => {
-    return [
-        body("name")
+const validateItem = (operation, minLength) => {
+    const validationRules = [
+        body("Name")
             .isLength({
-                min: 1,
+                min: minLength,
                 max: process.env.ITEM_NAME_MAX_LENGTH,
             })
             .withMessage(
                 `An item name must be provided and be shorter than ${process.env.ITEM_NAME_MAX_LENGTH} characters`
             ),
-        body("description")
+        body("Description")
             .isLength({ max: process.env.ITEM_DESCRIPTION_MAX_LENGTH })
             .withMessage(
                 `Item description must be shorter than ${process.env.ITEM_DESCRIPTION_MAX_LENGTH} characters`
             ),
-        body("price")
-            .isInt({ min: 1, max: Number.MAX_SAFE_INTEGER })
-            .withMessage(
-                `price must be between 1 and ${Number.MAX_SAFE_INTEGER}`
-            ),
-        body("quantity")
-            .isInt({ min: 1, max: Number.MAX_SAFE_INTEGER })
-            .withMessage(
-                `quantity must be between 1 and ${Number.MAX_SAFE_INTEGER}`
-            ),
-        body("url")
-            .isLength({ min: 1, max: process.env.ITEM_URL_MAX_LENGTH })
+        body("URL")
+            .isLength({ min: minLength, max: process.env.ITEM_URL_MAX_LENGTH })
             .withMessage(
                 `url must be provided and be shorter than ${process.env.ITEM_URL_MAX_LENGTH}`
             ),
     ];
+
+    if (operation === "add") {
+        validationRules.push(
+            body("Price")
+                .isInt({ min: minLength, max: Number.MAX_SAFE_INTEGER })
+                .withMessage(
+                    `price must be between ${minLength} and ${Number.MAX_SAFE_INTEGER}`
+                ),
+            body("Quantity")
+                .isInt({ min: minLength, max: Number.MAX_SAFE_INTEGER })
+                .withMessage(
+                    `quantity must be between ${minLength} and ${Number.MAX_SAFE_INTEGER}`
+                )
+        );
+    } else {
+        validationRules.push(
+            body("Price")
+                .isInt({ min: minLength, max: Number.MAX_SAFE_INTEGER })
+                .withMessage(
+                    `price must be between ${minLength} and ${Number.MAX_SAFE_INTEGER}`
+                )
+                .optional(),
+            body("Quantity")
+                .isInt({ min: minLength, max: Number.MAX_SAFE_INTEGER })
+                .withMessage(
+                    `quantity must be between ${minLength} and ${Number.MAX_SAFE_INTEGER}`
+                )
+                .optional()
+        );
+    }
+
+    return validationRules;
 };
+
 module.exports = {
     validateRegistration,
     validateCard,
