@@ -41,10 +41,14 @@ const registerUser = asyncHandler(async (req, res, next) => {
 
     const result = await DB_registerUser(table, user, res);
 
+    const accessToken = jwt.sign({ userID }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "100y",
+    });
+
     res.status(201).json({
         message: `${table} registration successful`,
         data: {
-            userID,
+            accessToken,
             username,
         },
     });
@@ -104,7 +108,7 @@ const loginUser = asyncHandler(async (req, res) => {
             message: "Login successful",
             data: {
                 accessToken,
-                type: "seller",
+                userType: "seller",
                 Username: sellerSearchResult[0][0].Username,
                 Balance: sellerSearchResult[0][0].Balance,
                 Phone_no: sellerSearchResult[0][0].Phone_no,
