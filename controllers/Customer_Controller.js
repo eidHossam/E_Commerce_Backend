@@ -54,6 +54,10 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
 
     const item = await validateRequest(Item_ID, Quantity, res);
 
+    if (Quantity === 0) {
+        return next(orderDeleteItem);
+    }
+
     const order = await DB_getOngoingOrder(customerID);
     let orderID;
     let totalItemPrice = item.Price * Quantity;
