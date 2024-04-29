@@ -58,7 +58,7 @@ const DB_getItemByName = async (itemName, res) => {
     }
 };
 
-const DB_getItemByID = async (itemID, res) => {
+const DB_getItemByID = async (itemID) => {
     try {
         query = "SELECT * FROM item WHERE Item_ID = ?";
 
@@ -66,7 +66,6 @@ const DB_getItemByID = async (itemID, res) => {
 
         return result;
     } catch (error) {
-        res.status(500);
         throw new Error(
             `Failed to find item with ID: ${itemID}` + error.message
         );

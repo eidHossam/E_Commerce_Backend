@@ -7,6 +7,7 @@ const {
     DB_createOrder,
     DB_isItemInOrder,
     DB_updateOrder,
+    DB_orderDeleteItem,
 } = require("../services/Order_Services");
 
 /**
@@ -19,7 +20,7 @@ const {
  */
 const validateRequest = asyncHandler(async (Item_ID, Quantity, res) => {
     //Check if the item exists
-    const response = await DB_getItemByID(Item_ID, res);
+    const response = await DB_getItemByID(Item_ID);
 
     const item = response[0][0];
     if (!item) {
@@ -76,7 +77,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
             totalItemPrice -= itemSearchResult.Quantity * item.Price;
         }
     } else {
-        await DB_orderAdditem(orderID, Item_ID, Quantity, res);
+        await DB_orderAdditem(orderID, Item_ID, Quantity, item.Price);
     }
 
     const attribute = "Total_payment";
@@ -91,4 +92,75 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
     });
 });
 
-module.exports = { orderAddItem };
+/**
+ * @brief Calulates the new order order price after deleting the item.
+ *
+ * @param {*} Order_ID      : ID of the order to be updated.
+ * @param {*} Item_ID       : ID of the deleted item.
+ * @param {*} Quantity      : Quantity of the item.
+ * @param {*} Order_Price   : Old item price.
+ */
+const updateOrderPrice = async (
+    Order_ID,
+    Quantity,
+    Item_Price,
+    Order_Price
+) => {
+    try {
+        Order_Price -= Quantity * Item_Price;
+
+        const attribute = "Total_payment";
+        await DB_updateOrder(Order_ID, attribute, Order_Price);
+
+        return Order_Price;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+/**
+ * @brief Deletes an item from the customer's order.
+ *
+ * @route DELETE /customers/orders/:Item_ID
+ *
+ * @access private
+ */
+const orderDeleteItem = asyncHandler(async (req, res) => {
+    const Item_ID = req.params.Item_ID;
+    const customerID = req.user;
+
+    const order = await DB_getOngoingOrder(customerID);
+
+    if (!order) {
+        res.status(404);
+        throw new Error(`There is no cart for customer with ID: ${customerID}`);
+    }
+
+    const Order_ID = order.Order_ID;
+    const itemSearchResult = await DB_isItemInOrder(Item_ID, Order_ID);
+
+    if (!itemSearchResult) {
+        res.status(404);
+        throw new Error(
+            `Customer's cart doesn't contain item with ID: ${Item_ID}`
+        );
+    }
+
+    await DB_orderDeleteItem(Order_ID, Item_ID);
+
+    const totalItemPrice = await updateOrderPrice(
+        Order_ID,
+        itemSearchResult.Quantity,
+        itemSearchResult.Price,
+        order.Total_payment
+    );
+
+    res.status(200).json({
+        message: `Item ${Item_ID} deleted from order: ${Order_ID} successfully`,
+        orderData: {
+            Order_ID,
+            totalItemPrice,
+        },
+    });
+});
+
+module.exports = { orderAddItem, orderDeleteItem };

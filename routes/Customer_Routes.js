@@ -1,4 +1,7 @@
-const { orderAddItem } = require("../controllers/Customer_Controller");
+const {
+    orderAddItem,
+    orderDeleteItem,
+} = require("../controllers/Customer_Controller");
 const validateToken = require("../middleware/validateTokenHandler");
 
 router = require("express").Router();
@@ -8,6 +11,6 @@ router.use(validateToken);
 
 router.route("/orders").post(orderAddItem).get().put(orderAddItem);
 
-router.delete("/orders/?itemID");
+router.delete("/orders/:Item_ID", orderDeleteItem);
 
 module.exports = router;

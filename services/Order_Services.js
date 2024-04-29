@@ -120,16 +120,38 @@ const DB_updateOrderItemQuantity = async (orderID, Item_ID, Quantity) => {
  * @param {*} quantity      : Quantity of the item to add to the order
  * @param {*} price         : Price of the item to add to the order.
  */
-const DB_orderAdditem = async (orderID, itemID, quantity) => {
+const DB_orderAdditem = async (orderID, itemID, quantity, price) => {
     try {
         const query =
-            "INSERT INTO order_items (`Order_ID`, `Item_ID`, `Quantity`) VALUES (?, ?, ?)";
-        await pool.query(query, [orderID, itemID, quantity]);
+            "INSERT INTO order_items (`Order_ID`, `Item_ID`, `Quantity`, `Price`) VALUES (?, ?, ?, ?)";
+        await pool.query(query, [orderID, itemID, quantity, price]);
 
         return orderID;
     } catch (error) {
         throw new Error(
             `Failed to insert item: ${itemID} into the order, ${error.message}`
+        );
+    }
+};
+
+/**
+ * @brief Deletes an item from the given customer order.
+ *
+ * @param {*} Order_ID  : ID of the order to delete the item from.
+ * @param {*} Item_ID   : ID of the item to delete.
+ * @returns             : Result object of the query.
+ */
+const DB_orderDeleteItem = async (Order_ID, Item_ID) => {
+    try {
+        const query =
+            "DELETE FROM `order_items` WHERE `Order_ID` = ? AND `Item_ID` = ?";
+
+        const result = await pool.query(query, [Order_ID, Item_ID]);
+
+        return result;
+    } catch (error) {
+        throw new Error(
+            `Failed to delete item: ${Item_ID} in order: ${Order_ID}, ${error.message}`
         );
     }
 };
@@ -141,4 +163,5 @@ module.exports = {
     DB_isItemInOrder,
     DB_createOrder,
     DB_updateOrder,
+    DB_orderDeleteItem,
 };
