@@ -156,6 +156,24 @@ const DB_orderDeleteItem = async (Order_ID, Item_ID) => {
     }
 };
 
+/**
+ * @brief Deletes a customer's ongoing order
+ *
+ * @param {*} Order_ID  : ID of the order to be deleted.
+ * @returns             : Result object of the query.
+ */
+const DB_deleteOrder = async (Order_ID) => {
+    try {
+        const query = "DELETE FROM `order_` WHERE `Order_ID` = ?";
+
+        const result = await pool.query(query, [Order_ID]);
+
+        return result;
+    } catch (error) {
+        throw new Error(`Could not delete order ${Order_ID}, ${error.message}`);
+    }
+};
+
 module.exports = {
     DB_orderAdditem,
     DB_updateOrderItemQuantity,
@@ -164,4 +182,5 @@ module.exports = {
     DB_createOrder,
     DB_updateOrder,
     DB_orderDeleteItem,
+    DB_deleteOrder,
 };

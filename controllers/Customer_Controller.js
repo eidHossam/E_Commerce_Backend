@@ -8,6 +8,7 @@ const {
     DB_isItemInOrder,
     DB_updateOrder,
     DB_orderDeleteItem,
+    DB_deleteOrder,
 } = require("../services/Order_Services");
 
 /**
@@ -18,26 +19,30 @@ const {
  * @param {*} res     : Response object.
  * @returns           : An object containing the item information.
  */
-const validateRequest = asyncHandler(async (Item_ID, Quantity, res) => {
-    //Check if the item exists
-    const response = await DB_getItemByID(Item_ID);
+const validateRequest = async (Item_ID, Quantity, res) => {
+    try {
+        //Check if the item exists
+        const response = await DB_getItemByID(Item_ID);
 
-    const item = response[0][0];
-    if (!item) {
-        res.status(404);
-        throw new Error(`Item ${Item_ID} not found.`);
+        const item = response[0][0];
+        if (!item) {
+            res.status(404);
+            throw new Error(`Item ${Item_ID} not found.`);
+        }
+
+        //Check if the requested quantity of the item is more than what is available.
+        if (Quantity > item.Quantity) {
+            res.status(400);
+            throw new Error(
+                `The requested quantity is not available only ${item.Quantity} in stock.`
+            );
+        }
+
+        return item;
+    } catch (error) {
+        throw new Error(error);
     }
-
-    //Check if the requested quantity of the item is more than what is available.
-    if (Quantity > item.Quantity) {
-        res.status(400);
-        throw new Error(
-            `The requested quantity is not available only ${item.Quantity} in stock.`
-        );
-    }
-
-    return item;
-});
+};
 
 /**
  * @brief Adds a new item to the customer's order.
@@ -91,7 +96,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
         message: `Item ${Item_ID} added in order: ${orderID} successfully`,
         orderData: {
             orderID,
-            totalItemPrice,
+            OrderCost: totalItemPrice,
         },
     });
 });
@@ -121,6 +126,7 @@ const updateOrderPrice = async (
         throw new Error(error.message);
     }
 };
+
 /**
  * @brief Deletes an item from the customer's order.
  *
@@ -162,9 +168,32 @@ const orderDeleteItem = asyncHandler(async (req, res) => {
         message: `Item ${Item_ID} deleted from order: ${Order_ID} successfully`,
         orderData: {
             Order_ID,
-            totalItemPrice,
+            OrderCost: totalItemPrice,
         },
     });
 });
 
-module.exports = { orderAddItem, orderDeleteItem };
+/**
+ * @brief Deletes an item from the customer's order.
+ *
+ * @route DELETE /customers/orders
+ *
+ * @access private
+ */
+const deleteOrder = asyncHandler(async (req, res) => {
+    const customerID = req.user;
+
+    const order = await DB_getOngoingOrder(customerID);
+
+    if (!order) {
+        res.status(404);
+        throw new Error(`Couldn't find cart for customer: ${customerID}`);
+    }
+
+    await DB_deleteOrder(order.Order_ID);
+
+    res.status(200).json({
+        message: `Order ${order.Order_ID} was successfully deleted.`,
+    });
+});
+module.exports = { orderAddItem, orderDeleteItem, deleteOrder };
