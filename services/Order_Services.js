@@ -101,6 +101,13 @@ const DB_updateOrder = async (orderID, attribute, value) => {
     }
 };
 
+/**
+ * @brief Updates the quantity of an item in an order.
+ *
+ * @param {*} orderID   : ID of the order to update the items in.
+ * @param {*} Item_ID   : ID of the item to update.
+ * @param {*} Quantity  : The new quantity of the item.
+ */
 const DB_updateOrderItemQuantity = async (orderID, Item_ID, Quantity) => {
     try {
         const query =

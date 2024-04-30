@@ -23,9 +23,8 @@ const {
 const validateRequest = async (Item_ID, Quantity, res) => {
     try {
         //Check if the item exists
-        const response = await DB_getItemByID(Item_ID);
+        const item = await DB_getItemByID(Item_ID);
 
-        const item = response[0][0];
         if (!item) {
             res.status(404);
             throw new Error(`Item ${Item_ID} not found.`);
