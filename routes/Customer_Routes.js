@@ -2,6 +2,7 @@ const {
     orderAddItem,
     orderDeleteItem,
     deleteOrder,
+    getOrder,
 } = require("../controllers/Customer_Controller");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -13,7 +14,7 @@ router.use(validateToken);
 router
     .route("/orders")
     .post(orderAddItem)
-    .get()
+    .get(getOrder)
     .put(orderAddItem)
     .delete(deleteOrder);
 

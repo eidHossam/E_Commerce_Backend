@@ -9,6 +9,7 @@ const {
     DB_updateOrder,
     DB_orderDeleteItem,
     DB_deleteOrder,
+    DB_getOrderItems,
 } = require("../services/Order_Services");
 
 /**
@@ -196,4 +197,30 @@ const deleteOrder = asyncHandler(async (req, res) => {
         message: `Order ${order.Order_ID} was successfully deleted.`,
     });
 });
-module.exports = { orderAddItem, orderDeleteItem, deleteOrder };
+
+/**
+ * @brief Gets all the items in the customer's order.
+ *
+ * @route GET /customers/orders
+ *
+ * @access private
+ */
+const getOrder = asyncHandler(async (req, res) => {
+    const customerID = req.user;
+
+    const order = await DB_getOngoingOrder(customerID);
+
+    if (!order) {
+        res.status(404);
+        throw new Error(`Couldn't find cart for customer: ${customerID}`);
+    }
+
+    const orderItems = await DB_getOrderItems(order.Order_ID);
+
+    res.status(200).json({
+        message: `Getting the customer's ${customerID} cart items.`,
+        items: orderItems,
+    });
+});
+
+module.exports = { orderAddItem, orderDeleteItem, deleteOrder, getOrder };

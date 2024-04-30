@@ -174,6 +174,25 @@ const DB_deleteOrder = async (Order_ID) => {
     }
 };
 
+/**
+ * @brief Gets all the items in an order.
+ *
+ * @param {*} orderID   : ID of the order to retrieve the items from.
+ * @returns             : An array of the items in the order.
+ */
+const DB_getOrderItems = async (orderID) => {
+    try {
+        const query =
+            "SELECT order_items.Item_ID, item.Name, order_items.Quantity, order_items.Price from order_items, item WHERE Order_ID = ? AND order_items.Item_ID = item.Item_ID;";
+
+        const orderItems = await pool.query(query, [orderID]);
+
+        return orderItems[0];
+    } catch (error) {
+        throw new Error(`Couldn't get the cart ${orderID}, ${error.message}`);
+    }
+};
+
 module.exports = {
     DB_orderAdditem,
     DB_updateOrderItemQuantity,
@@ -183,4 +202,5 @@ module.exports = {
     DB_updateOrder,
     DB_orderDeleteItem,
     DB_deleteOrder,
+    DB_getOrderItems,
 };
