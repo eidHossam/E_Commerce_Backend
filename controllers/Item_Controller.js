@@ -16,7 +16,7 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
     // Use map to extract the values of the "Category" key from each object
     res.status(200).json({
         message: "Sending all categories",
-        categories: categories[0],
+        categories,
     });
 });
 
@@ -27,14 +27,19 @@ const getAllCategories = asyncHandler(async (req, res, next) => {
  */
 const getItemsByCategory = asyncHandler(async (req, res, next) => {
     const category = req.params.category;
-    const items = await DB_getItemByCategory(category, res);
+    const items = await DB_getItemByCategory(category);
 
     res.status(200).json({
         message: `Getting all items by category ${category}`,
-        items: items[0],
+        items,
     });
 });
 
+/**
+ * @brief Retrieves all the items associated with a certain name.
+ * @route GET /items/:itemName
+ * @access public
+ */
 const getItemsByName = asyncHandler(async (req, res, next) => {
     const itemName = req.params.itemName;
 
@@ -43,11 +48,11 @@ const getItemsByName = asyncHandler(async (req, res, next) => {
         throw new Error("Item name must be provided");
     }
 
-    const items = await DB_getItemByName(itemName, res);
+    const items = await DB_getItemByName(itemName);
 
     res.status(200).json({
         message: `Getting all items by name: ${itemName}`,
-        items: items[0],
+        items,
     });
 });
 module.exports = { getAllCategories, getItemsByCategory, getItemsByName };

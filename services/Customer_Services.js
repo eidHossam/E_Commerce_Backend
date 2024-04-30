@@ -4,11 +4,11 @@ const { findUser } = require("../utils/UserUtils");
 /**
  * @breif Adds the customer additional information
  *
- * @param {*} userID : ID of the user
+ * @param {*} userID         : ID of the user
  * @param {*} insertionTable : The table to insert the customer in.
- * @param {*} data : dataof th user to be inserted
- * @param {*} res : Response object.
- * @returns : the result of the insertion process
+ * @param {*} data           : Data of th user to be inserted
+ * @param {*} res            : Response object.
+ * @returns                  : Result of the insertion process
  */
 const addCustomerInfo = async (userID, insertionTable, data, res) => {
     try {
@@ -61,8 +61,8 @@ const DB_addCustomerInfo = async (table, userID, data, res) => {
  * @breif : Retreive all the address associated with a given customer
  *
  * @param {*} userID : ID of the customer to search for
- * @param {*} res : response object
- * @returns : Array of addresses.
+ * @param {*} res    : Response object
+ * @returns          : Array of addresses.
  */
 const DB_getCustomerAddress = async (userID, res) => {
     try {
@@ -82,8 +82,8 @@ const DB_getCustomerAddress = async (userID, res) => {
  * @breif : Retreive all the cards associated with a given customer
  *
  * @param {*} userID : ID of the customer to search for
- * @param {*} res : response object
- * @returns : Array of cards.
+ * @param {*} res    : Response object
+ * @returns          : Array of cards.
  */
 const DB_getCustomerCard = async (userID, res) => {
     try {
@@ -99,4 +99,8 @@ const DB_getCustomerCard = async (userID, res) => {
     }
 };
 
-module.exports = { addCustomerInfo, DB_getCustomerAddress, DB_getCustomerCard };
+module.exports = {
+    addCustomerInfo,
+    DB_getCustomerAddress,
+    DB_getCustomerCard,
+};

@@ -6,3 +6,8 @@ exports.constants = {
     CONFLICT_ERROR: 409,
     SERVER_ERROR: 500,
 };
+
+exports.orderConstants = {
+    ONGOING: "Processing",
+    COMPLETED: "Completed",
+};

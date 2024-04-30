@@ -75,6 +75,13 @@ const DB_addItemCategories = async (itemID, categories, res) => {
     }
 };
 
+/**
+ * @brief Deletes all the categories assigned for a given item.
+ *
+ * @param {*} itemID : ID of the item to delete categories for.
+ * @param {*} res    : Response object.
+ * @returns          : Database operation result object.
+ */
 const DB_deleteItemCategories = async (itemID, res) => {
     try {
         const query = "DELETE FROM item_category WHERE Item_ID = ?";
@@ -141,6 +148,15 @@ const DB_getSellerItems = async (sellerID, res) => {
     }
 };
 
+/**
+ * @brief Updates the attributes of a given item
+ *
+ * @param {*} itemID        : ID of the item to update.
+ * @param {*} updateQuery   : List of attributes to update.
+ * @param {*} values        : New Values of the attributes.
+ * @param {*} res           : Response object.
+ * @returns                 : Database operation result object.
+ */
 const DB_updateItem = async (itemID, updateQuery, values, res) => {
     try {
         const query = `UPDATE item SET ${updateQuery} WHERE \`Item_ID\` = ?`;

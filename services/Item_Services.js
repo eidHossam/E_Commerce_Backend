@@ -1,19 +1,29 @@
 const pool = require("../config/DB_Connection");
 
+/**
+ * @brief Gets all the categories from the database with their icons.
+ *
+ * @returns : An array of all the categories.
+ */
 const DB_getCategories = async () => {
     try {
         query = "SELECT `Name`, `URL` FROM `category`";
 
         const result = await pool.query(query);
 
-        return result;
+        return result[0];
     } catch (error) {
-        res.status(500);
         throw new Error(`Failed to retrieve categories ` + error.message);
     }
 };
 
-const DB_getItemByCategory = async (category, res) => {
+/**
+ * @brief Retieves all the items in a certain category.
+ *
+ * @param {*} category  : The category to retrieve items from.
+ * @returns             : An array of the items retrieved with their categories.
+ */
+const DB_getItemByCategory = async (category) => {
     try {
         const query =
             "SELECT item.*,\
@@ -25,16 +35,21 @@ const DB_getItemByCategory = async (category, res) => {
 
         const result = await pool.query(query, [category]);
 
-        return result;
+        return result[0];
     } catch (error) {
-        res.status(500);
         throw new Error(
             `Failed to find items in ${category} category ` + error.message
         );
     }
 };
 
-const DB_getItemByName = async (itemName, res) => {
+/**
+ * @brief Retrieves all the items with a certain name.
+ *
+ * @param {*} itemName  : The name of the item to search for.
+ * @returns             : An array of the items retrieved with their categories.
+ */
+const DB_getItemByName = async (itemName) => {
     try {
         const itemNamePattern = `%${itemName}%`;
 
@@ -49,24 +64,28 @@ const DB_getItemByName = async (itemName, res) => {
 
         const result = await pool.query(query, [itemNamePattern]);
 
-        return result;
+        return result[0];
     } catch (error) {
-        res.status(500);
         throw new Error(
             `Failed to find items with name: ${itemName} ` + error.message
         );
     }
 };
 
-const DB_getItemByID = async (itemID, res) => {
+/**
+ * @brief Gets an item by its ID.
+ *
+ * @param {*} itemID    : ID of the item to retrieve.
+ * @returns             : Object with the item information.
+ */
+const DB_getItemByID = async (itemID) => {
     try {
         query = "SELECT * FROM item WHERE Item_ID = ?";
 
         const result = await pool.query(query, [itemID]);
 
-        return result;
+        return result[0][0];
     } catch (error) {
-        res.status(500);
         throw new Error(
             `Failed to find item with ID: ${itemID}` + error.message
         );

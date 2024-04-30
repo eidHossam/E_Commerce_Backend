@@ -14,10 +14,10 @@ const validateToken = asyncHanlder(async (req, res, next) => {
             //If the token is invalid throw an error
             if (err) {
                 res.status(401);
-                throw new Error("User not authorized.");
+                throw new Error("User not authorized invalid token.");
             }
 
-            //If the token is valid put the decoded information into the request body.
+            //If the token is valid put the decoded information into the request.
             req.user = decoded.userID;
             next();
         });
