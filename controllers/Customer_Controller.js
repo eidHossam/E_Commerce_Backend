@@ -218,6 +218,7 @@ const getOrder = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         message: `Getting the customer's ${customerID} cart items.`,
+        order,
         items: orderItems,
     });
 });
