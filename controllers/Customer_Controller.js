@@ -11,6 +11,8 @@ const {
     DB_deleteOrder,
     DB_getOrderItems,
 } = require("../services/Order_Services");
+const { validationResult } = require("express-validator");
+const { DB_updateCustomerBalance } = require("../services/Customer_Services");
 
 /**
  *@brief Checks if the item exists in out system and if the quantity requested is available.
@@ -223,4 +225,34 @@ const getOrder = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { orderAddItem, orderDeleteItem, deleteOrder, getOrder };
+/**
+ * @brief Charges the customer's in-store balance.
+ *
+ * @route PUT /customers/balance
+ *
+ * @access private
+ */
+const chargeBalance = asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        //Throw an error in case the user didn't provide a valid information.
+        res.status(400);
+        return next({ message: errors.array() });
+    }
+
+    const customerID = req.user;
+    const { amount } = req.body;
+    const Balance = await DB_updateCustomerBalance(customerID, amount);
+
+    res.status(200).json({
+        message: `${customerID} Balance updated successfully)`,
+        Balance,
+    });
+});
+module.exports = {
+    orderAddItem,
+    orderDeleteItem,
+    deleteOrder,
+    getOrder,
+    chargeBalance,
+};

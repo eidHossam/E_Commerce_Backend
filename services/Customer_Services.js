@@ -99,8 +99,37 @@ const DB_getCustomerCard = async (userID, res) => {
     }
 };
 
+/**
+ * @brief updates the customer's balance.
+ *
+ * @param {*} customerID    : ID od the customer to be updated.
+ * @param {*} balance       : The new balance to be added to the customer.
+ *
+ * @returns                 : The new balance of the customer.
+ */
+const DB_updateCustomerBalance = async (customerID, balance) => {
+    try {
+        const query =
+            "UPDATE customer SET `Balance` = `Balance` + ? WHERE `User_ID` = ?";
+
+        await pool.query(query, [balance, customerID]);
+
+        const newBalance = await pool.query(
+            "SELECT Balance FROM customer WHERE User_ID = ?",
+            [customerID]
+        );
+
+        return newBalance[0][0].Balance;
+    } catch (error) {
+        throw new Error(
+            `Could not update customer's balance: ${error.message}`
+        );
+    }
+};
+
 module.exports = {
     addCustomerInfo,
     DB_getCustomerAddress,
     DB_getCustomerCard,
+    DB_updateCustomerBalance,
 };
