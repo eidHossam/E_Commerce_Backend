@@ -190,7 +190,8 @@ const DB_deleteOrder = async (Order_ID) => {
 const DB_getOrderItems = async (orderID) => {
     try {
         const query =
-            "SELECT order_items.Item_ID, item.Name, order_items.Quantity, order_items.Price from order_items, item WHERE Order_ID = ? AND order_items.Item_ID = item.Item_ID;";
+            "SELECT order_items.Item_ID, item.Name, order_items.Quantity, order_items.Price, item.URL \
+            from order_items, item WHERE Order_ID = ? AND order_items.Item_ID = item.Item_ID;";
 
         const orderItems = await pool.query(query, [orderID]);
 
