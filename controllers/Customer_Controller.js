@@ -16,6 +16,7 @@ const {
     DB_updateUserBalance,
     DB_getUserBalance,
 } = require("../services/User_Services");
+const { DB_CustomerPurchaseHistory } = require("../services/Customer_Services");
 
 /**
  * @brief Adds a new item to the customer's order.
@@ -252,6 +253,24 @@ const checkoutByBalance = asyncHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * @brief Gets the customer's entire purchase history.
+ *
+ * @route GET /customers/history
+ *
+ * @access private
+ */
+const customerPurchaseHistory = asyncHandler(async (req, res) => {
+    const customerID = req.user;
+
+    const history = await DB_CustomerPurchaseHistory(customerID);
+
+    res.status(200).json({
+        message: `Customer ${customerID} history.`,
+        history,
+    });
+});
+
 module.exports = {
     orderAddItem,
     orderDeleteItem,
@@ -259,4 +278,5 @@ module.exports = {
     getOrder,
     chargeBalance,
     checkoutByBalance,
+    customerPurchaseHistory,
 };
