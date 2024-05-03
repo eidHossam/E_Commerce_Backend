@@ -108,7 +108,7 @@ const DB_getCustomerCard = async (userID, res) => {
 const DB_CustomerPurchaseHistory = async (customerID) => {
     try {
         const query =
-            'SELECT order_.Order_ID, order_items.Item_ID, item.Name, order_items.Price, order_items.Quantity \
+            'SELECT order_.Order_ID, order_items.Item_ID, item.Name, order_items.Price, order_items.Quantity, item.URL  \
             from order_, order_items, item WHERE order_.O_UserID = ? AND order_.Status = "Completed" \
             AND order_items.Order_ID = order_.Order_ID AND order_items.Item_ID = item.Item_ID';
 
@@ -131,6 +131,7 @@ const DB_CustomerPurchaseHistory = async (customerID) => {
                             name: row.Name,
                             price: row.Price,
                             quantity: row.Quantity,
+                            URL: row.URL,
                         },
                     ],
                 });
@@ -141,6 +142,7 @@ const DB_CustomerPurchaseHistory = async (customerID) => {
                     name: row.Name,
                     price: row.Price,
                     quantity: row.Quantity,
+                    URL: row.URL,
                 });
             }
 
