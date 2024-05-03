@@ -34,7 +34,8 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
     const itemPrice = req.itemPrice;
 
     if (Quantity === 0) {
-        return next(orderDeleteItem);
+        req.params.Item_ID = Item_ID;
+        return orderDeleteItem(req, res);
     }
 
     const order = await DB_getOngoingOrder(customerID);
@@ -54,7 +55,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
     //Check if the item is already added in the order and if yes update the quantity.
     const itemSearchResult = await DB_isItemInOrder(Item_ID, orderID);
     if (itemSearchResult) {
-        await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity, res);
+        await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity);
 
         if (order) {
             totalItemPrice -=

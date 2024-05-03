@@ -22,7 +22,7 @@ router
     .route("/orders")
     .post(validateOrderItem, orderAddItem)
     .get(getOrder)
-    .put(orderAddItem)
+    .put(validateOrderItem, orderAddItem)
     .delete(deleteOrder);
 
 router.delete("/orders/:Item_ID", orderDeleteItem);
