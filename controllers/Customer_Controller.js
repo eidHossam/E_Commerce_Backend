@@ -10,9 +10,13 @@ const {
     DB_orderDeleteItem,
     DB_deleteOrder,
     DB_getOrderItems,
+    DB_checkoutOrder,
 } = require("../services/Order_Services");
 const { validationResult } = require("express-validator");
-const { DB_updateCustomerBalance } = require("../services/Customer_Services");
+const {
+    DB_updateUserBalance,
+    DB_getUserBalance,
+} = require("../services/User_Services");
 
 /**
  *@brief Checks if the item exists in out system and if the quantity requested is available.
@@ -242,17 +246,50 @@ const chargeBalance = asyncHandler(async (req, res, next) => {
 
     const customerID = req.user;
     const { amount } = req.body;
-    const Balance = await DB_updateCustomerBalance(customerID, amount);
+    const Balance = await DB_updateUserBalance(customerID, amount, "customer");
 
     res.status(200).json({
         message: `${customerID} Balance updated successfully)`,
         Balance,
     });
 });
+
+/**
+ * @brief Checkout the customer's cart using his balance.
+ *
+ * @route PUT /customers/orders/checkout/balance
+ *
+ * @access private
+ */
+const checkoutByBalance = asyncHandler(async (req, res, next) => {
+    const customerID = req.user;
+
+    const order = await DB_getOngoingOrder(customerID);
+
+    if (!order) {
+        res.status(404);
+        throw new Error(`Couldn't find cart for customer: ${customerID}`);
+    }
+
+    const customerBalance = await DB_getUserBalance(customerID, "customer");
+
+    if (customerBalance < order.Total_payment) {
+        res.status(400);
+        throw new Error(`Customer ${customerID} doesn't have enough funds.`);
+    }
+
+    await DB_checkoutOrder(customerID, order.Order_ID, res);
+
+    res.status(200).json({
+        message: `${customerID} checked out order: ${order.Order_ID} successfully`,
+    });
+});
+
 module.exports = {
     orderAddItem,
     orderDeleteItem,
     deleteOrder,
     getOrder,
     chargeBalance,
+    checkoutByBalance,
 };

@@ -1,5 +1,7 @@
 const pool = require("../config/DB_Connection");
 const { orderConstants } = require("../utils/Constants");
+const { DB_getItemByID, DB_updateItem } = require("./Item_Services");
+const { DB_updateUserBalance } = require("./User_Services");
 
 /**
  * @brief Function to get the current date.
@@ -201,6 +203,90 @@ const DB_getOrderItems = async (orderID) => {
     }
 };
 
+/**
+ * @brief Checks out the customer's order.
+ *
+ * @param {*} customerID : ID of the customer to check out.
+ * @param {*} Order_ID   : ID of the order to check out.
+ * @param {*} res        : Response object.
+ */
+const DB_checkoutOrder = async (customerID, Order_ID, res) => {
+    let connection;
+    try {
+        //Get all the items in the customer's cart
+        const orderItems = await DB_getOrderItems(Order_ID);
+
+        //Begin a transaction to perform all the queries as an single atomic operation.
+        //This will allow us to either commit all the queries or abort all of them.
+        //This will keep the database consistent.
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        for (item of orderItems) {
+            const findItemQuery =
+                "SELECT `Quantity`, `I_UserID` FROM `item` WHERE `Item_ID` = ?";
+
+            const currentItemObject = await connection.execute(findItemQuery, [
+                item.Item_ID,
+            ]);
+            const currentItem = currentItemObject[0][0];
+
+            if (!currentItem || item.Quantity > currentItem.Quantity) {
+                throw new Error(`Item ${item.Item_ID} no longer available`);
+            }
+
+            //Update item quantity in stock.
+            const updateItemquantityQuery =
+                "UPDATE item SET `Quantity` = `Quantity` - ? WHERE `Item_ID` = ?";
+            await connection.execute(updateItemquantityQuery, [
+                item.Quantity,
+                item.Item_ID,
+            ]);
+
+            const itemPrice = item.Quantity * item.Price;
+            //Update customer balance
+            const updateCustomerBalanceQuery =
+                "UPDATE `customer` SET `Balance` = `Balance` - ? WHERE `User_ID` = ?";
+            await connection.execute(updateCustomerBalanceQuery, [
+                itemPrice,
+                customerID,
+            ]);
+
+            //Update seller balance and number of items sold
+            const updateSellerBalanceQuery =
+                "UPDATE `seller` SET `Balance` = `Balance` + ?, `Items_sold` = `Items_sold` + ?\
+                 WHERE `User_ID` = ?";
+            await connection.execute(updateSellerBalanceQuery, [
+                itemPrice,
+                item.Quantity,
+                currentItem.I_UserID,
+            ]);
+        }
+
+        const query = `UPDATE order_ SET \`Status\` = ? , \`Order_date\` = ? WHERE \`Order_ID\` = ?`;
+        const currentDate = getCurrentDate();
+
+        await connection.execute(query, [
+            orderConstants.COMPLETED,
+            currentDate,
+            Order_ID,
+        ]);
+
+        await connection.commit();
+    } catch (error) {
+        if (connection) {
+            await connection.rollback();
+            connection.release();
+        }
+
+        console.log("here");
+        res.status(500);
+        throw new Error(
+            `Customer ${customerID} checkout failed, ${error.message}`
+        );
+    }
+};
+
 module.exports = {
     DB_orderAdditem,
     DB_updateOrderItemQuantity,
@@ -211,4 +297,5 @@ module.exports = {
     DB_orderDeleteItem,
     DB_deleteOrder,
     DB_getOrderItems,
+    DB_checkoutOrder,
 };

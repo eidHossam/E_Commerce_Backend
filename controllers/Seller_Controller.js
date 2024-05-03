@@ -4,11 +4,11 @@ const { validationResult } = require("express-validator");
 const {
     DB_addItem,
     DB_deleteItem,
-    DB_getSellerItems,
     DB_updateItem,
     DB_deleteItemCategories,
     DB_addItemCategories,
-} = require("../services/Seller_Services");
+} = require("../services/Item_Services");
+const { DB_getSellerItems } = require("../services/Seller_Services");
 const checkSellerOwnership = require("../utils/SellerUtils");
 
 /**
@@ -123,7 +123,7 @@ const updateItem = asyncHandler(async (req, res, next) => {
 
     if (updateAttributes.length > 0) {
         //Update the item essential information.
-        await DB_updateItem(itemID, updateQuery, updateValues, res);
+        await DB_updateItem(itemID, updateQuery, updateValues);
     }
 
     res.status(200).json({
