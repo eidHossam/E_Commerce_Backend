@@ -5,7 +5,7 @@ const {
     getSellerItems,
     updateItem,
 } = require("../controllers/Seller_Controller");
-const { validateItem } = require("../services/Validation");
+const { validateItem } = require("../middleware/Validation");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
 

@@ -10,7 +10,7 @@ const {
     validateRegistration,
     validateCard,
     validateAddress,
-} = require("../services/Validation");
+} = require("../middleware/Validation");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
 

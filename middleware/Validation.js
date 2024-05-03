@@ -1,4 +1,6 @@
 const { body } = require("express-validator");
+const { DB_getItemByID } = require("../services/Item_Services");
+const asyncHandler = require("express-async-handler");
 
 const validateRegistration = (userType) => {
     const validationRules = [
@@ -159,10 +161,46 @@ const validateTransaction = () => {
         body().custom(isFutureDate),
     ];
 };
+
+/**
+ *@brief Checks if the item exists in out system and if the quantity requested is available.
+ *
+ * @param {*} req     : Request object.
+ * @param {*} res     : Response object.
+ */
+const validateOrderItem = asyncHandler(async (req, res, next) => {
+    try {
+        const { Item_ID, Quantity } = req.body;
+
+        //Check if the item exists
+        const item = await DB_getItemByID(Item_ID);
+
+        if (!item) {
+            res.status(404);
+            throw new Error(`Item ${Item_ID} not found.`);
+        }
+
+        //Check if the requested quantity of the item is more than what is available.
+        if (Quantity > item.Quantity) {
+            res.status(400);
+            throw new Error(
+                `The requested quantity is not available only ${item.Quantity} in stock.`
+            );
+        }
+
+        req.itemPrice = item.Price;
+
+        next();
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
 module.exports = {
     validateRegistration,
     validateCard,
     validateAddress,
     validateItem,
     validateTransaction,
+    validateOrderItem,
 };
