@@ -1,5 +1,4 @@
 const asyncHandler = require("express-async-handler");
-const { DB_getItemByID } = require("../services/Item_Services");
 const {
     DB_orderAdditem,
     DB_updateOrderItemQuantity,
@@ -19,38 +18,6 @@ const {
 } = require("../services/User_Services");
 
 /**
- *@brief Checks if the item exists in out system and if the quantity requested is available.
- *
- * @param {*} Item_ID : ID of the item to check.
- * @param {*} Quantity: Quantity requested.
- * @param {*} res     : Response object.
- * @returns           : An object containing the item information.
- */
-const validateRequest = async (Item_ID, Quantity, res) => {
-    try {
-        //Check if the item exists
-        const item = await DB_getItemByID(Item_ID);
-
-        if (!item) {
-            res.status(404);
-            throw new Error(`Item ${Item_ID} not found.`);
-        }
-
-        //Check if the requested quantity of the item is more than what is available.
-        if (Quantity > item.Quantity) {
-            res.status(400);
-            throw new Error(
-                `The requested quantity is not available only ${item.Quantity} in stock.`
-            );
-        }
-
-        return item;
-    } catch (error) {
-        throw new Error(error);
-    }
-};
-
-/**
  * @brief Adds a new item to the customer's order.
  * @route POSt /customers/orders
  *
@@ -63,7 +30,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
     const customerID = req.user;
     const { Item_ID, Quantity } = req.body;
 
-    const item = await validateRequest(Item_ID, Quantity, res);
+    const itemPrice = req.itemPrice;
 
     if (Quantity === 0) {
         return next(orderDeleteItem);
@@ -71,7 +38,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
 
     const order = await DB_getOngoingOrder(customerID);
     let orderID;
-    let totalItemPrice = item.Price * Quantity;
+    let totalItemPrice = itemPrice * Quantity;
 
     //Check is there is an old order already created for the customer
     if (!order) {
@@ -89,10 +56,10 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
         await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity, res);
 
         if (order) {
-            totalItemPrice -= itemSearchResult.Quantity * item.Price;
+            totalItemPrice -= itemSearchResult.Quantity * itemPrice;
         }
     } else {
-        await DB_orderAdditem(orderID, Item_ID, Quantity, item.Price);
+        await DB_orderAdditem(orderID, Item_ID, Quantity, itemPrice);
     }
 
     const attribute = "Total_payment";

@@ -7,7 +7,10 @@ const {
     checkoutByBalance,
 } = require("../controllers/Customer_Controller");
 const validateToken = require("../middleware/validateTokenHandler");
-const { validateTransaction } = require("../services/Validation");
+const {
+    validateTransaction,
+    validateOrderItem,
+} = require("../middleware/Validation");
 
 router = require("express").Router();
 
@@ -16,7 +19,7 @@ router.use(validateToken);
 
 router
     .route("/orders")
-    .post(orderAddItem)
+    .post(validateOrderItem, orderAddItem)
     .get(getOrder)
     .put(orderAddItem)
     .delete(deleteOrder);
