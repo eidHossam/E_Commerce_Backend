@@ -3,8 +3,11 @@ const {
     orderDeleteItem,
     deleteOrder,
     getOrder,
+    chargeBalance,
+    checkoutByBalance,
 } = require("../controllers/Customer_Controller");
 const validateToken = require("../middleware/validateTokenHandler");
+const { validateTransaction } = require("../services/Validation");
 
 router = require("express").Router();
 
@@ -20,4 +23,7 @@ router
 
 router.delete("/orders/:Item_ID", orderDeleteItem);
 
+router.put("/balance", validateTransaction(), chargeBalance);
+
+router.post("/orders/checkout/balance", checkoutByBalance);
 module.exports = router;

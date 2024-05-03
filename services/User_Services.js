@@ -49,4 +49,54 @@ const DB_searchUser = async (table, userID, res) => {
         throw new Error(`Failed to find ${table}` + error.message);
     }
 };
-module.exports = { DB_registerUser, DB_searchUser };
+
+/**
+ * @brief Retrieves the User's balance.
+ *
+ * @param {*} UserID    : ID of the User to retrieve the balance for.
+ * @returns                 : Balance of the User.
+ */
+const DB_getUserBalance = async (UserID, userType) => {
+    try {
+        const query = `SELECT Balance FROM ${userType} WHERE User_ID = ?`;
+
+        const balance = await pool.query(query, [UserID]);
+
+        return balance[0][0].Balance;
+    } catch (error) {
+        throw new Error(
+            `Failed to get ${userType} ${UserID} balance, ${error.message}`
+        );
+    }
+};
+
+/**
+ * @brief updates the User's balance.
+ *
+ * @param {*} UserID    : ID od the User to be updated.
+ * @param {*} balance       : The new balance to be added to the User.
+ *
+ * @returns                 : The new balance of the User.
+ */
+const DB_updateUserBalance = async (UserID, balance, userType) => {
+    try {
+        const query = `UPDATE ${userType} SET \`Balance\` = \`Balance\` + ? WHERE \`User_ID\` = ?`;
+
+        await pool.query(query, [balance, UserID]);
+
+        const newBalance = await DB_getUserBalance(UserID, userType);
+
+        return newBalance;
+    } catch (error) {
+        throw new Error(
+            `Could not update ${userType}'s balance: ${error.message}`
+        );
+    }
+};
+
+module.exports = {
+    DB_registerUser,
+    DB_searchUser,
+    DB_updateUserBalance,
+    DB_getUserBalance,
+};

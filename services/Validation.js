@@ -110,9 +110,59 @@ const validateItem = (operation, minLength) => {
     return validationRules;
 };
 
+/**
+ * @brief Checks if the provided date is in the future
+ *
+ * @param {*} month : Month of the year.
+ * @param {*} year  : The last 2 digits of the year.
+ */
+const isFutureDate = (value, { req }) => {
+    const currentDate = new Date();
+    const { expMonth, expYear } = req.body;
+
+    const century = new Date().getFullYear().toString().substring(0, 2);
+    const fullYear = `${century}${expYear}`;
+
+    const expirationDate = new Date(fullYear, expMonth - 1);
+
+    if (expirationDate < currentDate) {
+        throw new Error("Expiration date must be in the future");
+    }
+
+    return true;
+};
+
+/**
+ * @brief validates the expiration date to be in the future.
+ *
+ * @returns An array holding the errors if any.
+ */
+const validateTransaction = () => {
+    const currentYear = new Date().getFullYear().toString().substring(2, 5);
+    return [
+        body("amount")
+            .isInt({ min: 1 })
+            .withMessage("amount must be greater than zero"),
+        body("cardNumber")
+            .isLength({ min: 16, max: 16 })
+            .withMessage("Card number must be 16 digits long"),
+        body("expMonth")
+            .isInt({ min: 1, max: 12 })
+            .withMessage("Invalid expiration month"),
+        body("expYear")
+            .isInt({ min: currentYear })
+            .withMessage("Invalid expiration year"),
+        body("cvc")
+            .isLength({ min: 3, max: 3 })
+            .withMessage("CVC must be 3 digits long"),
+
+        body().custom(isFutureDate),
+    ];
+};
 module.exports = {
     validateRegistration,
     validateCard,
     validateAddress,
     validateItem,
+    validateTransaction,
 };
