@@ -57,7 +57,8 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
         await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity, res);
 
         if (order) {
-            totalItemPrice -= itemSearchResult.Quantity * itemPrice;
+            totalItemPrice -=
+                itemSearchResult.Quantity * itemSearchResult.Price;
         }
     } else {
         await DB_orderAdditem(orderID, Item_ID, Quantity, itemPrice);
