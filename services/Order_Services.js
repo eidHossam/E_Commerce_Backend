@@ -110,12 +110,17 @@ const DB_updateOrder = async (orderID, attribute, value) => {
  * @param {*} Item_ID   : ID of the item to update.
  * @param {*} Quantity  : The new quantity of the item.
  */
-const DB_updateOrderItemQuantity = async (orderID, Item_ID, Quantity) => {
+const DB_updateOrderItemQuantity = async (
+    orderID,
+    Item_ID,
+    Quantity,
+    itemPrice
+) => {
     try {
         const query =
-            "UPDATE order_items SET `Quantity` = ? WHERE `Order_ID` = ? AND `Item_ID` = ?";
+            "UPDATE order_items SET `Quantity` = ?, `Price` = ? WHERE `Order_ID` = ? AND `Item_ID` = ?";
 
-        await pool.query(query, [Quantity, orderID, Item_ID]);
+        await pool.query(query, [Quantity, itemPrice, orderID, Item_ID]);
     } catch (error) {
         throw new Error("Couldn't update order quantity: " + error.message);
     }
