@@ -8,7 +8,10 @@ const {
     DB_deleteItemCategories,
     DB_addItemCategories,
 } = require("../services/Item_Services");
-const { DB_getSellerItems } = require("../services/Seller_Services");
+const {
+    DB_getSellerItems,
+    DB_getSellerReports,
+} = require("../services/Seller_Services");
 const checkSellerOwnership = require("../utils/SellerUtils");
 
 /**
@@ -131,4 +134,22 @@ const updateItem = asyncHandler(async (req, res, next) => {
     });
 });
 
-module.exports = { addItem, deleteItem, getSellerItems, updateItem };
+/**
+ * @brief Returns the reports of the performance of the sales of each item.
+ * @route GET /sellers/reports
+ * @access private
+ */
+const sellerPerformanceReports = asyncHandler(async (req, res, next) => {
+    const sellerID = req.user;
+
+    const reports = await DB_getSellerReports(sellerID);
+    res.status(200).json({ message: `${sellerID} sales reports.`, reports });
+});
+
+module.exports = {
+    addItem,
+    deleteItem,
+    getSellerItems,
+    updateItem,
+    sellerPerformanceReports,
+};
