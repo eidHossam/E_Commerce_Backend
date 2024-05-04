@@ -4,6 +4,7 @@ const {
     deleteItem,
     getSellerItems,
     updateItem,
+    sellerPerformanceReports,
 } = require("../controllers/Seller_Controller");
 const { validateItem } = require("../middleware/Validation");
 const validateToken = require("../middleware/validateTokenHandler");
@@ -18,4 +19,5 @@ router
     .put(validateItem("update", 0), updateItem)
     .delete(deleteItem);
 
+router.get("/reports/", sellerPerformanceReports);
 module.exports = router;

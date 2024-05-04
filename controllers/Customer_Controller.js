@@ -55,7 +55,7 @@ const orderAddItem = asyncHandler(async (req, res, next) => {
     //Check if the item is already added in the order and if yes update the quantity.
     const itemSearchResult = await DB_isItemInOrder(Item_ID, orderID);
     if (itemSearchResult) {
-        await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity);
+        await DB_updateOrderItemQuantity(orderID, Item_ID, Quantity, itemPrice);
 
         if (order) {
             totalItemPrice -=
