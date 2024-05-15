@@ -34,9 +34,6 @@ This documentation outlines the architecture, features, and functionalities of a
 
     -   Advanced search functionality enables users to search for items using various criteria.
 
-            1. Search using item name.
-            2. Search by category.
-
 5.  **Account Information**:
 
     -   Users can view their account info, including current cash balance, purchased items, sold items, and pending transactions.
@@ -72,6 +69,10 @@ This documentation outlines the architecture, features, and functionalities of a
 
 4. **View Order History**:
     - Can view their order history to track past purchases.
+      
+5. **Search for Items**:
+      1. Search using item name.
+      2. Search by category.
 
 ### Seller:
 
@@ -104,15 +105,20 @@ This documentation outlines the architecture, features, and functionalities of a
 -   **Database Design**:
 
     -   Design the database schema to support customer orders, item management, and sales reporting efficiently.
+       ![Database](https://github.com/eidHossam/E_Commerce_Backend/assets/106603484/c8ac5e62-56ed-409a-8056-55d649a569d6)
+
 
 -   **Reporting Module**:
     -   Develop a reporting module to generate sales reports for sellers based on item sales data.
 
 By incorporating these functionalities and considerations, you can create a robust and user-friendly online market platform that meets the needs of both customers and sellers.
 
+---
+
 ### System Architecture:
 
 The system follows a modular architecture, with components organized into layers:
+![server](https://github.com/eidHossam/E_Commerce_Backend/assets/106603484/8d2ae560-0a9c-4010-b62b-011e13aed516)
 
 1. **Presentation Layer**:
 
@@ -133,6 +139,7 @@ The system follows a modular architecture, with components organized into layers
     - Implements authentication and authorization mechanisms using JWT for secure access control.
     - Input validation and sanitization are enforced using Express Validator to prevent security vulnerabilities such as SQL injection and XSS attacks.
 
+---
 ### API Endpoints:
 
 ### Customer Module (`customerRoutes.js`)
