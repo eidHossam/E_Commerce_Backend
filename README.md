@@ -197,8 +197,6 @@ The system follows a modular architecture, with components organized into layers
 
 Each module uses Express.js Router to define its routes and associated controller functions. Additionally, middleware functions are utilized for input validation and user authentication.
 
-Great! Since the details of all endpoints are available on Postman API tool, you can refer users to Postman for comprehensive documentation. Here's how you can include that information in your project documentation:
-
 ---
 
 ### Endpoint Documentation:
